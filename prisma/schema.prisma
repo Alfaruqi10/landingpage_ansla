@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum VoucherDiscountType {
+  PERCENT
+  FIXED
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CustomerUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  imageUrl  String?
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Voucher {
+  id            String              @id @default(cuid())
+  code          String              @unique
+  label         String
+  discountType  VoucherDiscountType
+  discountValue Int
+  minPurchase   Int                 @default(0)
+  usageLimit    Int?
+  usedCount     Int                 @default(0)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  orders        Order[]
+}
+
+model Product {
+  id               String      @id @default(cuid())
+  name             String
+  slug             String      @unique
+  featured         Boolean     @default(false)
+  price            Int
+  compareAtPrice   Int?
+  shortDescription String
+  description      String
+  imageUrl         String
+  galleryImages    Json?
+  variantOptions   Json?
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  categoryId       String
+  category         Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  orderItems       OrderItem[]
+}
+
+model Order {
+  id                   String        @id @default(cuid())
+  orderNumber          String        @unique
+  customerUserId       String?
+  voucherId            String?
+  voucherCode          String?
+  voucherDiscount      Int           @default(0)
+  customerName         String
+  email                String?
+  phone                String
+  province             String
+  city                 String
+  district             String
+  address              String
+  postalCode           String?
+  notes                String?
+  shippingMethod       String
+  paymentMethod        String
+  paymentStatus        String        @default("PENDING")
+  paymentProvider      String?
+  paymentReference     String?       @unique
+  paymentGatewayOrderId String?      @unique
+  paymentAttemptCount  Int           @default(0)
+  paymentQrString      String?
+  paymentQrUrl         String?
+  paymentPayload       Json?
+  paymentExpiresAt     DateTime?
+  paidAt               DateTime?
+  checkoutMethod       String
+  status               String        @default("PENDING")
+  subtotal             Int
+  shippingCost         Int           @default(0)
+  total                Int
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  customerUser         CustomerUser? @relation(fields: [customerUserId], references: [id], onDelete: SetNull)
+  voucher              Voucher?      @relation(fields: [voucherId], references: [id], onDelete: SetNull)
+  items                OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String?
+  productName String
+  productSlug String
+  imageUrl    String
+  variantName String?
+  quantity    Int
+  unitPrice   Int
+  lineTotal   Int
+  createdAt   DateTime @default(now())
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  rating    Int
+  content   String
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String
+  imageUrl  String
+  ctaText   String
+  ctaLink   String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String?
+  phone     String?
+  email     String?
+  source    String
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
+}
