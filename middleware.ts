@@ -1,11 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { AUTH_COOKIE_NAME, verifyAuthToken } from "@/lib/session";
+import {
+  ADMIN_AUTH_COOKIE_NAME,
+  verifyEdgeAuthToken
+} from "./lib/session-edge";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
-  const session = token ? await verifyAuthToken(token) : null;
+  const token = request.cookies.get(ADMIN_AUTH_COOKIE_NAME)?.value;
+  const session = token ? await verifyEdgeAuthToken(token) : null;
 
   if (pathname === "/admin/login") {
     if (session) {
