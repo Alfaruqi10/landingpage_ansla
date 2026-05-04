@@ -1,63 +1,92 @@
 import { db } from "@/lib/db";
 import { buildCollectionItems, isProductInCollection } from "@/lib/collections";
+import { unstable_cache } from "next/cache";
 
 export type ProductSortOption = "latest" | "featured" | "price-asc" | "price-desc";
 
+const STOREFRONT_REVALIDATE_SECONDS = 300;
+
+const getCachedHomePageData = unstable_cache(
+  async () => {
+    const [banners, featuredProducts, categories, testimonials, faqs] = await Promise.all([
+      db.banner.findMany({
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+        take: 3
+      }),
+      db.product.findMany({
+        where: { isActive: true, featured: true },
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+        take: 4
+      }),
+      db.category.findMany({
+        orderBy: [{ sortOrder: "asc" }, { name: "asc" }]
+      }),
+      db.testimonial.findMany({
+        where: { isActive: true },
+        orderBy: { createdAt: "desc" },
+        take: 6
+      }),
+      db.fAQ.findMany({
+        where: { isActive: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }]
+      })
+    ]);
+
+    const collectionItems = buildCollectionItems(categories);
+
+    return {
+      banners,
+      featuredProducts,
+      categories,
+      collectionItems,
+      testimonials,
+      faqs
+    };
+  },
+  ["storefront-home"],
+  {
+    revalidate: STOREFRONT_REVALIDATE_SECONDS,
+    tags: ["storefront"]
+  }
+);
+
+const getCachedCatalogSnapshot = unstable_cache(
+  async () => {
+    const [products, categories] = await Promise.all([
+      db.product.findMany({
+        where: { isActive: true },
+        include: { category: true },
+        orderBy: [{ featured: "desc" }, { createdAt: "desc" }]
+      }),
+      db.category.findMany({
+        orderBy: [{ sortOrder: "asc" }, { name: "asc" }]
+      })
+    ]);
+
+    return {
+      products,
+      categories,
+      collectionItems: buildCollectionItems(categories)
+    };
+  },
+  ["storefront-catalog"],
+  {
+    revalidate: STOREFRONT_REVALIDATE_SECONDS,
+    tags: ["storefront"]
+  }
+);
+
 export async function getHomePageData() {
-  const [banners, featuredProducts, categories, testimonials, faqs] = await Promise.all([
-    db.banner.findMany({
-      where: { isActive: true },
-      orderBy: { sortOrder: "asc" },
-      take: 3
-    }),
-    db.product.findMany({
-      where: { isActive: true, featured: true },
-      include: { category: true },
-      orderBy: { createdAt: "desc" },
-      take: 4
-    }),
-    db.category.findMany({
-      orderBy: [{ sortOrder: "asc" }, { name: "asc" }]
-    }),
-    db.testimonial.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
-      take: 6
-    }),
-    db.fAQ.findMany({
-      where: { isActive: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }]
-    })
-  ]);
-
-  const collectionItems = buildCollectionItems(categories);
-
-  return {
-    banners,
-    featuredProducts,
-    categories,
-    collectionItems,
-    testimonials,
-    faqs
-  };
+  return getCachedHomePageData();
 }
 
 export async function getProductsPageData(
   collectionSlug?: string,
   sort: ProductSortOption = "latest"
 ) {
-  const [allProducts, categories] = await Promise.all([
-    db.product.findMany({
-      where: { isActive: true },
-      include: { category: true },
-      orderBy: [{ featured: "desc" }, { createdAt: "desc" }]
-    }),
-    db.category.findMany({
-      orderBy: [{ sortOrder: "asc" }, { name: "asc" }]
-    })
-  ]);
-
-  const collectionItems = buildCollectionItems(categories);
+  const { products: allProducts, categories, collectionItems } = await getCachedCatalogSnapshot();
   const selectedCollection = collectionItems.find((item) => item.slug === collectionSlug);
 
   const products = selectedCollection
@@ -92,23 +121,39 @@ export async function getProductsPageData(
 }
 
 export async function getProductBySlug(slug: string) {
-  return db.product.findUnique({
-    where: { slug },
-    include: { category: true }
-  });
+  return unstable_cache(
+    async () =>
+      db.product.findUnique({
+        where: { slug },
+        include: { category: true }
+      }),
+    ["storefront-product", slug],
+    {
+      revalidate: STOREFRONT_REVALIDATE_SECONDS,
+      tags: ["storefront", `product:${slug}`]
+    }
+  )();
 }
 
 export async function getRelatedProducts(categoryId: string, excludeId: string) {
-  return db.product.findMany({
-    where: {
-      categoryId,
-      isActive: true,
-      id: {
-        not: excludeId
-      }
-    },
-    include: { category: true },
-    take: 3,
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }]
-  });
+  return unstable_cache(
+    async () =>
+      db.product.findMany({
+        where: {
+          categoryId,
+          isActive: true,
+          id: {
+            not: excludeId
+          }
+        },
+        include: { category: true },
+        take: 3,
+        orderBy: [{ featured: "desc" }, { createdAt: "desc" }]
+      }),
+    ["storefront-related-products", categoryId, excludeId],
+    {
+      revalidate: STOREFRONT_REVALIDATE_SECONDS,
+      tags: ["storefront"]
+    }
+  )();
 }

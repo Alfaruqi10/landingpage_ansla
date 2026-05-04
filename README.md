@@ -163,6 +163,9 @@ Default admin credential:
 - `NEXT_PUBLIC_WHATSAPP_NUMBER`
 - `NEXT_PUBLIC_SUPPORT_EMAIL`
 - `NEXT_PUBLIC_ENABLE_QRIS`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_STORAGE_BUCKET`
 - `MIDTRANS_SERVER_KEY`
 - `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY`
 - `MIDTRANS_IS_PRODUCTION`
@@ -212,12 +215,13 @@ npm run db:seed
 
 - Cart dan checkout web sudah aktif
 - Login/register pelanggan, halaman akun, voucher, dan relasi order ke akun pelanggan sudah aktif
-- Image upload mendukung URL dan file lokal
+- Image upload mendukung URL, file lokal untuk development, dan Supabase Storage untuk deployment/live
 - Form publik memakai server actions dan validasi Zod
 - Admin CRUD dibuat simpel dan mudah dikembangkan
 - UI dioptimalkan untuk conversion dan mobile-first browsing
 - Halaman produk mendukung checkout web, keranjang, buy now, dan WhatsApp
 - QRIS Midtrans sudah ada di codebase, tetapi saat ini sengaja dinonaktifkan sementara lewat `NEXT_PUBLIC_ENABLE_QRIS="false"` sampai channel production dan domain publik siap
+- Untuk upload gambar di web live, siapkan bucket public di Supabase Storage lalu isi `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, dan `SUPABASE_STORAGE_BUCKET`
 
 ## Dokumentasi Halaman
 
@@ -225,4 +229,3 @@ Dokumen penjelasan tiap halaman dan CRUD admin ada di:
 
 - [docs/HALAMAN_DAN_CRUD.md](./docs/HALAMAN_DAN_CRUD.md)
 - [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)
-

@@ -469,6 +469,27 @@ export function ProductDetailExperience({
               </div>
               <p className="mt-5">{product.shortDescription}</p>
 
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Buyer note
+                  </p>
+                  <p className="mt-2 text-sm">Tampilan rapi untuk dipakai ulang, bukan sekali foto saja.</p>
+                </div>
+                <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Jika ragu size
+                  </p>
+                  <p className="mt-2 text-sm">Tanya size dan warna lewat WhatsApp sebelum checkout juga bisa.</p>
+                </div>
+                <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Alur order
+                  </p>
+                  <p className="mt-2 text-sm">Bisa langsung checkout web atau minta dibantu order manual.</p>
+                </div>
+              </div>
+
               {variants.length > 0 ? (
                 <div className="mt-6">
                   <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
@@ -574,7 +595,7 @@ export function ProductDetailExperience({
                   onClick={handleBuyNow}
                   disabled={isPurchaseDisabled}
                 >
-                  Checkout Web
+                  Checkout Sekarang
                 </Button>
                 <Button
                   type="button"
@@ -594,7 +615,7 @@ export function ProductDetailExperience({
                   className="h-12 w-full border-emerald-500/50 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
                 >
                   <Link href={whatsappLink} target="_blank">
-                    Tanya via WhatsApp
+                    Tanya Size via WhatsApp
                   </Link>
                 </Button>
               </div>
@@ -629,6 +650,26 @@ export function ProductDetailExperience({
             ) : null}
           </div>
           <p className="mt-4 text-sm leading-7 sm:mt-5 sm:text-base">{product.shortDescription}</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Buyer note
+              </p>
+              <p className="mt-2 text-sm">Look rapi dan aman untuk dipakai ke banyak momen.</p>
+            </div>
+            <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Jika ragu size
+              </p>
+              <p className="mt-2 text-sm">Kami bisa bantu pilih size dan warna sebelum Anda bayar.</p>
+            </div>
+            <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Cara order
+              </p>
+              <p className="mt-2 text-sm">Lanjut checkout web atau tanya dulu lewat WhatsApp, dua-duanya aman.</p>
+            </div>
+          </div>
           {variants.length > 0 ? (
             <div className="mt-5 sm:mt-6">
               <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
@@ -716,7 +757,7 @@ export function ProductDetailExperience({
               onClick={handleBuyNow}
               disabled={isPurchaseDisabled}
             >
-              Checkout Web
+              Checkout Sekarang
             </Button>
             <Button
               type="button"
@@ -736,7 +777,7 @@ export function ProductDetailExperience({
               className="h-11 w-full border-emerald-500/50 px-6 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40 sm:h-12 sm:px-7"
             >
               <Link href={whatsappLink} target="_blank">
-                Tanya via WhatsApp
+                Tanya Size via WhatsApp
               </Link>
             </Button>
           </div>

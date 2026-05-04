@@ -22,10 +22,19 @@ export function ProductCard({ product, mobileCompact = false }: ProductCardProps
     siteConfig.whatsappNumber,
     `Assalamu'alaikum, saya tertarik dengan ${product.name} dan ingin tanya detailnya.`
   );
+  const savingsPercent =
+    product.compareAtPrice && product.compareAtPrice > product.price
+      ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+      : 0;
 
   return (
     <article className="surface-panel flex h-full flex-col overflow-hidden p-3">
       <div className="relative overflow-hidden rounded-[1.25rem] bg-stone-100">
+        {savingsPercent > 0 ? (
+          <div className="absolute left-3 top-3 z-10 rounded-full bg-stone-950 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white shadow-lg">
+            Hemat {savingsPercent}%
+          </div>
+        ) : null}
         <Image
           src={product.imageUrl}
           alt={product.name}
@@ -65,6 +74,9 @@ export function ProductCard({ product, mobileCompact = false }: ProductCardProps
           >
             {product.shortDescription}
           </p>
+          <p className="mt-2 text-xs uppercase tracking-[0.18em] text-stone-500">
+            Cocok untuk dipakai harian, acara keluarga, dan momen spesial
+          </p>
         </div>
         <div className="mt-auto">
           <div className={`flex min-h-[3rem] items-end gap-2 sm:gap-3`}>
@@ -95,7 +107,7 @@ export function ProductCard({ product, mobileCompact = false }: ProductCardProps
           >
             <Link href={whatsappLink} target="_blank">
               <span className="sm:hidden">Tanya WA</span>
-              <span className="hidden sm:inline">Tanya via WA</span>
+              <span className="hidden sm:inline">Tanya warna & size</span>
             </Link>
           </Button>
           <Button
@@ -109,7 +121,7 @@ export function ProductCard({ product, mobileCompact = false }: ProductCardProps
           >
             <Link href={`/products/${product.slug}`}>
               <span className="sm:hidden">Detail</span>
-              <span className="hidden sm:inline">Detail Produk</span>
+              <span className="hidden sm:inline">Cek bahan & detail</span>
               <ArrowRight className={mobileCompact ? "ml-1 h-3.5 w-3.5 sm:ml-2 sm:h-4 sm:w-4" : "ml-2 h-4 w-4"} />
             </Link>
           </Button>

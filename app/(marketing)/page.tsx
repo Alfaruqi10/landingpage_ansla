@@ -126,11 +126,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <div className="space-y-5">
                 <p className="section-eyebrow">Koleksi pilihan untuk dipakai di momen nyata</p>
                 <h1 className="max-w-[11ch] text-balance text-5xl leading-[0.98] sm:max-w-3xl md:text-7xl">
-                  Pilih koleksi yang terasa premium, jatuh rapi, dan mudah dipakai berulang kali.
+                  Cari model yang bahannya enak, jatuhnya rapi, dan tetap aman dipakai di banyak momen.
                 </h1>
                 <p className="max-w-xl text-base text-stone-600 sm:max-w-2xl md:text-xl">
-                  Setiap koleksi ANSLA disusun agar Anda bisa lebih cepat menemukan model yang cocok,
-                  lalu lanjut checkout web atau konsultasi via WhatsApp tanpa alur yang melelahkan.
+                  Kami rapikan pilihan koleksi, foto, dan alur order supaya Anda lebih cepat yakin:
+                  lihat modelnya, cek detail pentingnya, lalu checkout atau tanya ukuran tanpa ribet.
                 </p>
               </div>
 
@@ -344,10 +344,43 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className="section-space">
         <div className="container">
           <Reveal>
+            <div className="grid gap-4 lg:grid-cols-3">
+              <div className="surface-panel p-5 sm:p-6">
+                <p className="section-eyebrow">Langkah 1</p>
+                <h2 className="mt-3 text-2xl">Pilih model yang paling dekat dengan kebutuhan Anda</h2>
+                <p className="mt-3 text-stone-600">
+                  Mulai dari koleksi yang paling Anda cari, lalu cek produk dengan potongan, warna,
+                  dan kesan pakai yang paling cocok.
+                </p>
+              </div>
+              <div className="surface-panel p-5 sm:p-6">
+                <p className="section-eyebrow">Langkah 2</p>
+                <h2 className="mt-3 text-2xl">Bandingkan cepat bahan, look, dan rasa amannya</h2>
+                <p className="mt-3 text-stone-600">
+                  Fokus ke hal yang paling penting buat pembeli: nyaman dipakai, tidak terlalu ribet,
+                  dan tetap terlihat rapi saat dipakai ulang.
+                </p>
+              </div>
+              <div className="surface-panel p-5 sm:p-6">
+                <p className="section-eyebrow">Langkah 3</p>
+                <h2 className="mt-3 text-2xl">Lanjut checkout atau tanya size lewat WhatsApp</h2>
+                <p className="mt-3 text-stone-600">
+                  Kalau sudah cocok langsung order, kalau masih ragu tinggal minta bantuan warna,
+                  size, atau rekomendasi model yang paling pas.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="section-space pt-0">
+        <div className="container">
+          <Reveal>
             <SectionHeading
               eyebrow="Produk unggulan"
-              title="Pilihan terlaris untuk first purchase dari iklan"
-              description="Koleksi yang paling sering dipilih karena mudah dipakai, warna aman, dan tampil premium tanpa terlihat berlebihan."
+              title="Pilihan yang paling sering bikin pembeli cepat yakin"
+              description="Koleksi ini paling sering dipilih karena warnanya aman, siluetnya mudah dipakai, dan detailnya cukup jelas untuk lanjut order lebih cepat."
               action={
                 <Button asChild variant="outline">
                   <Link href="/products">
@@ -373,8 +406,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <Reveal>
             <SectionHeading
               eyebrow="Koleksi"
-              title="Jelajahi koleksi berdasarkan gaya dan kebutuhan utama"
-              description="Pilih berdasarkan gaya yang paling Anda cari agar lebih cepat menemukan model yang terasa pas."
+              title="Masuk dari kebutuhan Anda, bukan dari katalog yang membingungkan"
+              description="Pilih jalur yang paling relevan dulu supaya Anda tidak perlu buka terlalu banyak produk sebelum menemukan yang terasa pas."
             />
           </Reveal>
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -453,8 +486,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <Reveal>
               <SectionHeading
                 eyebrow="Testimoni pelanggan"
-                title="Pendapat pelanggan membantu Anda belanja dengan lebih yakin"
-                description="Lihat pengalaman pembeli lain soal bahan, kenyamanan, dan kesan saat dipakai."
+                title="Pengalaman pembeli lain membantu Anda menilai sebelum checkout"
+                description="Perhatikan komentar soal bahan, rasa nyaman saat dipakai, dan kesan tampilannya supaya keputusan belanja terasa lebih aman."
               />
               <div className="mt-8 grid gap-5 md:grid-cols-2">
                 {testimonials.map((testimonial, index) => (
@@ -531,8 +564,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <Reveal>
               <SectionHeading
                 eyebrow="Pertanyaan yang sering ditanyakan"
-                title="Jawaban cepat sebelum Anda lanjut order"
-                description="Kami rangkum pertanyaan paling umum soal bahan, ukuran, dan pemesanan supaya Anda lebih praktis."
+                title="Jawaban singkat untuk hal yang biasanya bikin calon pembeli menahan checkout"
+                description="Kami rangkum pertanyaan paling umum soal bahan, ukuran, dan pemesanan supaya Anda tidak perlu mulai bertanya dari nol."
               />
               <div className="mt-8 space-y-4">
                 {faqs.map((faq, index) => (

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireAdminSession } from "@/lib/auth";
@@ -312,6 +312,12 @@ const ORDER_STATUS_OPTIONS = [
   "Dibatalkan"
 ] as const;
 
+function revalidateStorefrontPaths() {
+  revalidateTag("storefront");
+  revalidatePath("/");
+  revalidatePath("/products");
+}
+
 export async function updateOrderStatusAction(formData: FormData) {
   await requireAdminSession();
 
@@ -427,8 +433,7 @@ export async function upsertCategoryAction(formData: FormData) {
     redirectWithError(formData, "Collection gagal disimpan. Pastikan slug unik.");
   }
 
-  revalidatePath("/");
-  revalidatePath("/products");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/categories");
   redirectWithSuccess(formData, "Collection berhasil disimpan.");
 }
@@ -447,8 +452,7 @@ export async function deleteCategoryAction(formData: FormData) {
     );
   }
 
-  revalidatePath("/");
-  revalidatePath("/products");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/categories");
   redirectWithSuccess(formData, "Collection berhasil dihapus.");
 }
@@ -579,12 +583,13 @@ export async function upsertProductAction(formData: FormData) {
     );
   }
 
-  revalidatePath("/");
-  revalidatePath("/products");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/products");
+  revalidateTag(`product:${parsed.data.slug}`);
   revalidatePath(`/products/${parsed.data.slug}`);
 
   if (existingProduct?.slug && existingProduct.slug !== parsed.data.slug) {
+    revalidateTag(`product:${existingProduct.slug}`);
     revalidatePath(`/products/${existingProduct.slug}`);
   }
 
@@ -606,11 +611,11 @@ export async function deleteProductAction(formData: FormData) {
     redirectWithError(formData, "Produk gagal dihapus.");
   }
 
-  revalidatePath("/");
-  revalidatePath("/products");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/products");
 
   if (product?.slug) {
+    revalidateTag(`product:${product.slug}`);
     revalidatePath(`/products/${product.slug}`);
   }
 
@@ -679,7 +684,7 @@ export async function upsertTestimonialAction(formData: FormData) {
     redirectWithError(formData, "Testimonial gagal disimpan.");
   }
 
-  revalidatePath("/");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/testimonials");
   redirectWithSuccess(formData, "Testimonial berhasil disimpan.");
 }
@@ -695,7 +700,7 @@ export async function deleteTestimonialAction(formData: FormData) {
     redirectWithError(formData, "Testimonial gagal dihapus.");
   }
 
-  revalidatePath("/");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/testimonials");
   redirectWithSuccess(formData, "Testimonial berhasil dihapus.");
 }
@@ -732,7 +737,7 @@ export async function upsertFaqAction(formData: FormData) {
     redirectWithError(formData, "FAQ gagal disimpan.");
   }
 
-  revalidatePath("/");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/faqs");
   redirectWithSuccess(formData, "FAQ berhasil disimpan.");
 }
@@ -748,7 +753,7 @@ export async function deleteFaqAction(formData: FormData) {
     redirectWithError(formData, "FAQ gagal dihapus.");
   }
 
-  revalidatePath("/");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/faqs");
   redirectWithSuccess(formData, "FAQ berhasil dihapus.");
 }
@@ -799,7 +804,7 @@ export async function upsertBannerAction(formData: FormData) {
     redirectWithError(formData, "Banner gagal disimpan.");
   }
 
-  revalidatePath("/");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/banners");
   redirectWithSuccess(formData, "Banner berhasil disimpan.");
 }
@@ -815,7 +820,7 @@ export async function deleteBannerAction(formData: FormData) {
     redirectWithError(formData, "Banner gagal dihapus.");
   }
 
-  revalidatePath("/");
+  revalidateStorefrontPaths();
   revalidatePath("/admin/banners");
   redirectWithSuccess(formData, "Banner berhasil dihapus.");
 }
