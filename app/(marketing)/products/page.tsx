@@ -129,11 +129,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                   </Suspense>
                 </div>
 
-                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+                <div className="-mx-1 flex gap-2 overflow-x-auto scrollbar-none snap-x snap-mandatory px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
                   <Button
                     asChild
                     variant={!activeCollection ? "default" : "outline"}
-                    className="h-10 shrink-0 rounded-full px-4 text-sm"
+                    className="h-10 shrink-0 snap-start rounded-full px-4 text-xs sm:text-sm touch-target"
                   >
                     <Link href={selectedSort === "latest" ? "/products" : `/products?sort=${selectedSort}`}>
                       Semua
@@ -144,7 +144,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                       key={collection.slug}
                       asChild
                       variant={activeCollection === collection.slug ? "default" : "outline"}
-                      className="h-10 shrink-0 rounded-full px-4 text-sm"
+                      className="h-10 shrink-0 snap-start rounded-full px-4 text-xs sm:text-sm touch-target"
                     >
                       <Link
                         href={
@@ -160,13 +160,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
 
                 <div className="flex items-center justify-between gap-3 sm:hidden">
-                  <Badge variant="secondary" className="rounded-full px-4 py-2 text-stone-700">
+                  <Badge variant="secondary" className="rounded-full px-3 py-1 text-[11px] text-stone-700">
                     {products.length} produk tersedia
                   </Badge>
                   <Button
                     asChild
                     variant="outline"
-                    className="h-10 rounded-full px-4 text-sm"
+                    className="h-10 rounded-full px-4 text-xs touch-target"
                   >
                     <Link
                       href={buildWhatsAppLink(
@@ -182,7 +182,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </div>
 
               <div className="hidden items-center gap-3 lg:flex">
-                <Button asChild variant="outline">
+                <Button asChild variant="outline" className="h-10 rounded-full touch-target">
                   <Link
                     href={buildWhatsAppLink(
                       siteConfig.whatsappNumber,
@@ -198,9 +198,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </Reveal>
 
           {products.length > 0 ? (
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-6 md:grid-cols-3 xl:grid-cols-3">
               {products.map((product, index) => (
-                <Reveal key={product.id} delay={index * 0.05}>
+                <Reveal key={product.id} delay={index * 0.04}>
                   <ProductCard product={product} mobileCompact />
                 </Reveal>
               ))}

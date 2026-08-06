@@ -91,24 +91,22 @@
 
 @layer components {
   .surface-panel {
-    @apply rounded-[1.5rem] shadow-soft backdrop-blur;
-    border-color: hsl(var(--border) / 0.8);
-    background-color: hsl(var(--card) / 0.84);
+    @apply rounded-[1.25rem] sm:rounded-[1.5rem] shadow-soft backdrop-blur border border-border/80 bg-[hsl(var(--card)/0.84)];
     box-shadow:
-      0 22px 70px rgba(74, 53, 33, 0.08),
-      0 6px 20px rgba(45, 32, 20, 0.06);
+      0 18px 50px rgba(74, 53, 33, 0.07),
+      0 4px 16px rgba(45, 32, 20, 0.05);
   }
 
   .section-space {
-    @apply py-16 md:py-24;
+    @apply py-12 sm:py-16 md:py-20 lg:py-24;
   }
 
   .section-eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground;
+    @apply text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground;
   }
 
   .floating-shell {
-    @apply rounded-[2rem] border backdrop-blur;
+    @apply rounded-[1.5rem] sm:rounded-[2rem] border backdrop-blur;
     border-color: hsl(var(--border) / 0.8);
     background:
       linear-gradient(135deg, hsl(var(--card) / 0.95), hsl(var(--card) / 0.82));
@@ -118,21 +116,21 @@
   }
 
   .insight-card {
-    @apply rounded-[1.35rem] border backdrop-blur;
+    @apply rounded-[1.15rem] sm:rounded-[1.35rem] border backdrop-blur;
     border-color: hsl(var(--border) / 0.72);
     background:
       linear-gradient(145deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.72));
     box-shadow:
-      0 18px 48px rgba(58, 39, 24, 0.12),
-      0 3px 10px rgba(58, 39, 24, 0.05);
+      0 14px 40px rgba(58, 39, 24, 0.1),
+      0 3px 8px rgba(58, 39, 24, 0.04);
   }
 
   .trust-strip {
-    @apply rounded-[1.5rem] border backdrop-blur;
+    @apply rounded-[1.25rem] sm:rounded-[1.5rem] border backdrop-blur;
     border-color: hsl(var(--border) / 0.72);
     background:
       linear-gradient(135deg, rgba(44, 35, 28, 0.92), rgba(66, 53, 40, 0.9));
-    box-shadow: 0 20px 55px rgba(30, 23, 17, 0.18);
+    box-shadow: 0 16px 45px rgba(30, 23, 17, 0.16);
   }
 
   .hero-photo-slide {
@@ -148,6 +146,35 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .fluid-hero-title {
+    font-size: clamp(2.25rem, 5vw + 0.875rem, 3.85rem);
+    line-height: 1.02;
+  }
+
+  .fluid-h2 {
+    font-size: clamp(1.75rem, 3.5vw + 0.5rem, 2.75rem);
+    line-height: 1.08;
+  }
+
+  .fluid-h3 {
+    font-size: clamp(1.25rem, 2vw + 0.5rem, 1.75rem);
+    line-height: 1.15;
   }
 
   .dark .bg-white {

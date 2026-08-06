@@ -113,10 +113,10 @@ export default function ContactPage({ searchParams }: ContactPageProps) {
             <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
               <div>
                 <p className="section-eyebrow">Tanya ANSLA</p>
-                <h1 className="mt-3 max-w-[12ch] text-balance text-3xl leading-[1.04] sm:mt-4 sm:max-w-4xl sm:text-5xl lg:text-6xl">
+                <h1 className="mt-2.5 max-w-[12ch] text-balance fluid-hero-title font-semibold">
                   Ceritakan kebutuhan Anda untuk menemukan pilihan yang lebih pas.
                 </h1>
-                <p className="mt-3 max-w-xl text-sm sm:mt-5 sm:max-w-2xl sm:text-lg">
+                <p className="mt-3 max-w-xl text-sm sm:mt-4 sm:max-w-2xl sm:text-base text-muted-foreground">
                   Anda bisa tanya soal model, ukuran, bahan, warna, atau cara order yang paling nyaman.
                 </p>
               </div>

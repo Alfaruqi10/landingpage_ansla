@@ -19,12 +19,12 @@ export function SectionHeading({
     >
       <div className="max-w-2xl">
         <p className="section-eyebrow">{eyebrow}</p>
-        <h2 className="mt-2 text-balance text-3xl leading-[1.06] sm:mt-3 sm:text-4xl md:text-5xl">
+        <h2 className="mt-2 text-balance fluid-h2 font-semibold">
           {title}
         </h2>
-        {description ? <p className="mt-2 text-sm sm:mt-3 sm:text-base">{description}</p> : null}
+        {description ? <p className="mt-2 text-sm sm:mt-3 text-muted-foreground leading-relaxed">{description}</p> : null}
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? <div className="shrink-0 mt-2 sm:mt-0">{action}</div> : null}
     </div>
   );
 }

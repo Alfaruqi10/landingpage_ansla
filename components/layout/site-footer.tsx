@@ -30,14 +30,14 @@ export function SiteFooter() {
 
   return (
     <footer className="border-t border-border/70 bg-[hsl(var(--card)/0.72)]">
-      <div className="container grid gap-8 py-10 sm:gap-10 sm:py-12 md:grid-cols-[1.1fr_0.9fr]">
+      <div className="container grid gap-8 py-8 sm:gap-10 sm:py-10 md:grid-cols-[1.1fr_0.9fr]">
         <div>
           <SiteLogo className="w-fit" />
-          <p className="mt-3 max-w-xl text-sm leading-7 sm:text-base">
+          <p className="mt-3 max-w-xl text-sm leading-6 sm:text-base text-muted-foreground">
             Koleksi abaya dan modestwear yang membantu Anda tampil rapi, lembut, dan nyaman
             dipakai untuk aktivitas harian maupun acara spesial.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3 sm:mt-6">
+          <div className="mt-4 flex flex-wrap gap-2.5 sm:mt-5">
             {socialItems.map((item) => (
               <Link
                 key={item.label}
@@ -45,24 +45,24 @@ export function SiteFooter() {
                 target="_blank"
                 aria-label={item.label}
                 title={item.label}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/80 text-muted-foreground transition hover:border-foreground/30 hover:text-foreground"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/80 text-muted-foreground transition-all duration-180 hover:border-foreground/40 hover:text-foreground hover:bg-stone-100 dark:hover:bg-stone-800"
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-4.5 w-4.5" />
               </Link>
             ))}
           </div>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
               Navigasi
             </p>
-            <div className="mt-3 grid gap-3 sm:mt-4">
+            <div className="mt-3 grid gap-2.5 sm:mt-4">
               {siteConfig.navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-sm text-muted-foreground hover:text-foreground sm:text-base"
+                  className="text-sm text-muted-foreground transition-colors duration-180 hover:text-foreground"
                 >
                   {item.label}
                 </Link>
@@ -70,13 +70,13 @@ export function SiteFooter() {
             </div>
           </div>
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
               Kontak
             </p>
-            <div className="mt-3 grid gap-3 text-sm text-muted-foreground sm:mt-4 sm:text-base">
+            <div className="mt-3 grid gap-2.5 text-sm text-muted-foreground sm:mt-4">
               <p>{siteConfig.email}</p>
               <p>Bisa konsultasi produk dan ukuran setiap hari lewat WhatsApp.</p>
-              <Link href={siteConfig.marketplaceLinks.shopee} target="_blank" className="hover:text-foreground">
+              <Link href={siteConfig.marketplaceLinks.shopee} target="_blank" className="font-medium text-foreground underline-offset-4 hover:underline">
                 Kunjungi Shopee
               </Link>
             </div>

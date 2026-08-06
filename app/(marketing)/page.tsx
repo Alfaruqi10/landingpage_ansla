@@ -110,28 +110,28 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <>
-      <section className="relative -mt-24 overflow-hidden text-stone-900 dark:text-white md:-mt-28">
-        <div className="absolute inset-x-0 top-0 h-[620px] bg-[radial-gradient(circle_at_top,_rgba(186,160,123,0.28),_transparent_48%)] dark:bg-[radial-gradient(circle_at_top,_rgba(190,160,113,0.1),_transparent_42%)]" />
-        <div className="absolute right-[-8rem] top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(212,191,161,0.24),_transparent_66%)] blur-3xl dark:bg-[radial-gradient(circle,_rgba(212,191,161,0.08),_transparent_66%)]" />
-        <div className="container relative pb-12 pt-48 sm:pb-14 sm:pt-52 lg:pb-16 lg:pt-52">
-          <div className="grid gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:items-center">
-            <Reveal className="space-y-5 text-center sm:text-left">
-              <div className="flex flex-col items-center gap-4 sm:flex-row">
-                <div className="rounded-full border border-stone-200/80 bg-white/92 px-4 py-2 text-xs font-semibold text-stone-700 shadow-[0_10px_24px_rgba(59,42,28,0.08)] dark:border-white/14 dark:bg-white/8 dark:text-white/88 dark:shadow-[0_14px_34px_rgba(0,0,0,0.16)]">
+      <section className="relative -mt-20 overflow-hidden text-stone-900 dark:text-white md:-mt-24">
+        <div className="absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_top,_rgba(186,160,123,0.24),_transparent_48%)] dark:bg-[radial-gradient(circle_at_top,_rgba(190,160,113,0.1),_transparent_42%)]" />
+        <div className="absolute right-[-8rem] top-20 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(212,191,161,0.22),_transparent_66%)] blur-3xl dark:bg-[radial-gradient(circle,_rgba(212,191,161,0.08),_transparent_66%)]" />
+        <div className="container relative pb-8 pt-28 sm:pb-12 sm:pt-36 lg:pb-14 lg:pt-40">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:items-center">
+            <Reveal className="space-y-4 sm:space-y-5 text-center sm:text-left">
+              <div className="flex flex-col items-center gap-2.5 sm:flex-row sm:gap-4">
+                <div className="rounded-full border border-stone-200/80 bg-white/92 px-3.5 py-1.5 text-[11px] sm:text-xs font-semibold text-stone-700 shadow-sm dark:border-white/14 dark:bg-white/8 dark:text-white/88">
                   Untuk Anda yang ingin tampil anggun tanpa ribet
                 </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-stone-200/80 bg-white/80 px-4 py-2 text-sm text-stone-600 shadow-[0_10px_24px_rgba(59,42,28,0.06)] dark:border-white/12 dark:bg-white/8 dark:text-white/82 dark:shadow-[0_14px_34px_rgba(0,0,0,0.16)]">
-                  <Star className="h-4 w-4 fill-current text-amber-500" />
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/80 bg-white/80 px-3.5 py-1.5 text-xs sm:text-sm text-stone-600 shadow-sm dark:border-white/12 dark:bg-white/8 dark:text-white/82">
+                  <Star className="h-3.5 w-3.5 fill-current text-amber-500" />
                   {siteConfig.socialProof.rating} Rating - {siteConfig.socialProof.reviews} Reviews
                 </div>
               </div>
 
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-                <div className="flex -space-x-3">
+              <div className="flex flex-col items-center gap-2.5 sm:flex-row sm:gap-4 justify-center sm:justify-start">
+                <div className="flex -space-x-2.5">
                   {avatarTestimonials.map((testimonial, index) => (
                     <div
                       key={testimonial.id}
-                      className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-[hsl(var(--background))] bg-stone-200 shadow-md"
+                      className="relative h-8 w-8 sm:h-10 sm:w-10 overflow-hidden rounded-full border-2 border-[hsl(var(--background))] bg-stone-200 shadow-sm"
                     >
                       <Image
                         src={testimonial.imageUrl!}
@@ -144,29 +144,29 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     </div>
                   ))}
                 </div>
-                <p className="max-w-xs text-sm leading-6 text-stone-700 dark:text-white/68">
-                  Dipilih ribuan pelanggan yang mencari modestwear rapi, nyaman, dan mudah diorder.
+                <p className="max-w-xs text-xs sm:text-sm leading-5 sm:leading-6 text-stone-700 dark:text-white/70">
+                  Dipilih ribuan pelanggan yang mencari modestwear rapi & nyaman.
                 </p>
               </div>
 
-              <div className="mx-auto max-w-[720px] space-y-5 sm:mx-0">
+              <div className="mx-auto max-w-[720px] space-y-3 sm:space-y-4 sm:mx-0">
                 <p className="section-eyebrow">
                   Koleksi pilihan untuk dipakai di momen nyata
                 </p>
-                <h1 className="text-balance text-[2.65rem] leading-[0.98] text-stone-900 dark:text-white sm:text-6xl lg:text-[4.35rem]">
+                <h1 className="text-balance fluid-hero-title font-semibold text-stone-900 dark:text-white">
                   Cari model yang bahannya enak, jatuhnya rapi, dan tetap aman dipakai di banyak momen.
                 </h1>
-                <p className="mx-auto max-w-xl text-base leading-7 text-stone-700 dark:text-white/70 sm:mx-0 md:text-lg">
+                <p className="mx-auto max-w-xl text-sm leading-6 text-stone-700 dark:text-white/70 sm:mx-0 sm:text-base md:text-lg">
                   Lihat modelnya, cek detail pentingnya, lalu order via Shopee
                   atau tanya ukuran lewat WhatsApp — tanpa ribet.
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:flex sm:flex-wrap">
+              <div className="grid grid-cols-1 gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
                 <Button
                   asChild
                   size="lg"
-                  className="h-12 rounded-full px-8 shadow-[0_16px_30px_rgba(36,26,18,0.18)]"
+                  className="h-11 sm:h-12 rounded-full px-6 sm:px-8 text-sm sm:text-base font-semibold shadow-[0_12px_24px_rgba(36,26,18,0.14)] touch-target"
                 >
                   <Link href="/products">
                     Lihat Koleksi
@@ -177,7 +177,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="h-12 rounded-full border-stone-300/90 bg-white/85 px-8 text-stone-900 shadow-[0_12px_28px_rgba(52,37,23,0.08)] hover:bg-white/95 dark:border-white/18 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
+                  className="h-11 sm:h-12 rounded-full border-stone-300/90 bg-white/85 px-6 sm:px-8 text-sm sm:text-base text-stone-900 shadow-sm hover:bg-white/95 dark:border-white/18 dark:bg-white/8 dark:text-white dark:hover:bg-white/12 touch-target"
                 >
                   <Link
                     href={buildWhatsAppLink(
@@ -191,17 +191,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-2">
                 {heroStats.map((stat) => (
                   <div
                     key={stat.label}
-                    className="insight-card p-3 text-center sm:p-4 sm:text-left"
+                    className="insight-card p-2.5 sm:p-3.5 text-center sm:text-left"
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500 sm:text-xs">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500 sm:text-xs">
                       {stat.label}
                     </p>
-                    <p className="mt-2 text-2xl font-semibold text-stone-900 dark:text-white sm:text-3xl">{stat.value}</p>
-                    <p className="mt-1 hidden text-xs leading-5 sm:block">{stat.note}</p>
+                    <p className="mt-1 sm:mt-2 text-xl font-bold text-stone-900 dark:text-white sm:text-3xl">{stat.value}</p>
+                    <p className="mt-0.5 hidden text-xs leading-4 sm:block">{stat.note}</p>
                   </div>
                 ))}
               </div>
@@ -344,9 +344,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               }
             />
           </Reveal>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
             {featuredProducts.map((product, index) => (
-              <Reveal key={product.id} delay={index * 0.06}>
+              <Reveal key={product.id} delay={index * 0.05}>
                 <ProductCard product={product} />
               </Reveal>
             ))}
@@ -363,29 +363,29 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               description="Pilih jalur yang paling relevan dulu supaya Anda tidak perlu buka terlalu banyak produk sebelum menemukan yang terasa pas."
             />
           </Reveal>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {collectionCards.map((collection, index) => (
-              <Reveal key={collection.slug} delay={index * 0.06}>
+              <Reveal key={collection.slug} delay={index * 0.05}>
                 <Link
                   href={`/products?collection=${collection.slug}`}
-                  className="group surface-panel block overflow-hidden p-3"
+                  className="group surface-panel block overflow-hidden p-2.5 sm:p-3"
                 >
-                  <div className="relative h-56 overflow-hidden rounded-[1.25rem] bg-stone-100 sm:h-72">
+                  <div className="relative h-44 overflow-hidden rounded-[1rem] sm:rounded-[1.25rem] bg-stone-100 sm:h-72">
                     {collection.imageUrl ? (
                       <Image
                         src={collection.imageUrl}
                         alt={collection.label}
                         fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                        className="object-cover transition duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                        className="object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : null}
                     <div className="absolute inset-0 bg-gradient-to-t from-stone-950/82 via-stone-950/18 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                      <span className="block font-display text-2xl tracking-tight text-white drop-shadow-[0_4px_14px_rgba(0,0,0,0.35)]">
+                    <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 text-white">
+                      <span className="block font-display text-lg sm:text-2xl tracking-tight text-white drop-shadow-[0_4px_14px_rgba(0,0,0,0.35)]">
                         {collection.label}
                       </span>
-                      <span className="mt-1 block text-sm text-white/80">Lihat collection</span>
+                      <span className="mt-0.5 block text-xs text-white/80 sm:text-sm">Lihat koleksi</span>
                     </div>
                   </div>
                 </Link>

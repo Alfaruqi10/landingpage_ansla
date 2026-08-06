@@ -35,3 +35,5 @@ codex-dev.log
 codex-dev.err.log
 dev-server.log
 dev-server.err.log
+
+*.zip

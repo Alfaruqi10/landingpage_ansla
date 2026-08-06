@@ -68,10 +68,10 @@ export default function AboutPage() {
             <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
               <div>
                 <p className="section-eyebrow">Tentang ANSLA</p>
-                <h1 className="mt-3 max-w-[12ch] text-balance text-3xl leading-[1.04] sm:mt-4 sm:max-w-4xl sm:text-5xl lg:text-6xl">
+                <h1 className="mt-2.5 max-w-[12ch] text-balance fluid-hero-title font-semibold">
                   Pilihan koleksi untuk tampil anggun di momen yang benar-benar Anda jalani.
                 </h1>
-                <p className="mt-3 max-w-xl text-sm sm:mt-5 sm:max-w-2xl sm:text-lg">
+                <p className="mt-3 max-w-xl text-sm sm:mt-4 sm:max-w-2xl sm:text-base text-muted-foreground">
                   Temukan modestwear dengan warna lembut, detail rapi, dan rasa nyaman saat
                   dipakai berulang kali.
                 </p>
