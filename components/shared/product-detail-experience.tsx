@@ -860,9 +860,9 @@ export function ProductDetailExperience({
                       type="button"
                       onClick={() => handleVariantSelect(variant)}
                       className={cn(
-                        "inline-flex items-center rounded-xl border px-3 py-2 text-sm transition",
+                        "inline-flex min-h-[44px] touch-target items-center rounded-xl border px-3.5 py-2.5 text-sm font-medium transition-all duration-180",
                         isSelected
-                          ? "border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900"
+                          ? "border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900 shadow-sm"
                           : "border-border/80 bg-[hsl(var(--card)/0.85)] hover:border-stone-400"
                       )}
                     >
@@ -874,7 +874,7 @@ export function ProductDetailExperience({
             </div>
           ) : null}
           <div className="mt-5 sm:mt-6">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
               Size
             </p>
             <div className="mt-3 flex flex-wrap gap-2.5">
@@ -888,9 +888,9 @@ export function ProductDetailExperience({
                     onClick={() => setSelectedSize(sizeOption.label)}
                     disabled={!sizeOption.isAvailable}
                     className={cn(
-                      "inline-flex min-w-[56px] items-center justify-center rounded-xl border px-3 py-2 text-sm transition",
+                      "inline-flex min-w-[56px] min-h-[44px] touch-target items-center justify-center rounded-xl border px-3.5 py-2.5 text-sm font-medium transition-all duration-180",
                       isSelected
-                        ? "border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900"
+                        ? "border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900 shadow-sm"
                         : "border-border/80 bg-[hsl(var(--card)/0.85)] hover:border-stone-400",
                       !sizeOption.isAvailable &&
                         "cursor-not-allowed border-border/60 bg-[hsl(var(--card)/0.45)] text-muted-foreground opacity-45 hover:border-border/60"
