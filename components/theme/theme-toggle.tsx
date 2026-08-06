@@ -43,15 +43,12 @@ export function ThemeToggle({
       onClick={toggleTheme}
       aria-label={mounted ? `Aktifkan mode ${theme === "dark" ? "light" : "dark"}` : "Toggle theme"}
       className={cn(
-        "inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border/80 bg-[hsl(var(--card)/0.88)] px-4 text-sm font-medium text-foreground shadow-soft transition hover:bg-[hsl(var(--accent)/0.85)]",
-        compact && "w-10 px-0",
+        "inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/80 bg-[hsl(var(--card)/0.88)] text-foreground shadow-soft transition hover:bg-[hsl(var(--accent)/0.85)]",
+        compact && "h-10 w-10",
         className
       )}
     >
       {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-      <span className={cn("hidden sm:inline", compact && "hidden")}>
-        {mounted ? (theme === "dark" ? "Mode Terang" : "Mode Gelap") : "Tema"}
-      </span>
     </button>
   );
 }

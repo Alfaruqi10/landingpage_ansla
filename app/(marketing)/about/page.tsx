@@ -45,7 +45,7 @@ const values = [
   },
   {
     title: "Mudah dipakai di momen nyata",
-    text: "Setiap koleksi dibuat agar tetap terasa masuk untuk aktivitas harian, acara keluarga, undangan, sampai momen spesial Anda."
+    text: "Setiap pilihan tetap terasa masuk untuk aktivitas harian, acara keluarga, undangan, sampai momen spesial Anda."
   },
   {
     title: "Detail yang terasa refined",
@@ -69,11 +69,11 @@ export default function AboutPage() {
               <div>
                 <p className="section-eyebrow">Tentang ANSLA</p>
                 <h1 className="mt-3 max-w-[12ch] text-balance text-3xl leading-[1.04] sm:mt-4 sm:max-w-4xl sm:text-5xl lg:text-6xl">
-                  Koleksi yang dibuat untuk membantu Anda tampil anggun di momen yang benar-benar Anda jalani.
+                  Pilihan koleksi untuk tampil anggun di momen yang benar-benar Anda jalani.
                 </h1>
                 <p className="mt-3 max-w-xl text-sm sm:mt-5 sm:max-w-2xl sm:text-lg">
-                  Kami merancang ANSLA untuk Anda yang mencari modestwear dengan warna lembut,
-                  detail rapi, dan rasa nyaman saat dipakai berulang kali.
+                  Temukan modestwear dengan warna lembut, detail rapi, dan rasa nyaman saat
+                  dipakai berulang kali.
                 </p>
               </div>
 
@@ -112,22 +112,22 @@ export default function AboutPage() {
         <div className="container grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <Reveal>
             <div className="surface-panel h-full overflow-hidden p-5 sm:p-8">
-              <p className="section-eyebrow">Cerita Kami</p>
+              <p className="section-eyebrow">Untuk Anda</p>
               <h2 className="mt-3 max-w-2xl text-balance text-2xl leading-[1.08] sm:mt-4 sm:text-4xl">
-                Kami percaya Anda bisa tampil modern tanpa kehilangan rasa lembut dan nyaman.
+                Anda bisa tampil modern tanpa kehilangan rasa lembut dan nyaman.
               </h2>
               <div className="mt-4 space-y-4 sm:mt-5">
                 <p>
-                  Koleksi ANSLA dirancang untuk menjawab kebutuhan Anda yang ingin terlihat rapi
-                  di kegiatan harian, tetapi tetap pantas dipakai ke acara yang lebih spesial.
+                  Koleksi ANSLA cocok untuk Anda yang ingin terlihat rapi di kegiatan harian,
+                  tetapi tetap pantas dipakai ke acara yang lebih spesial.
                 </p>
                 <p>
-                  Karena itu kami fokus pada siluet yang flowy, bahan yang nyaman, dan warna
-                  yang mudah dipadukan dengan gaya Anda sehari-hari.
+                  Siluet yang flowy, bahan yang nyaman, dan warna yang mudah dipadukan membantu
+                  gaya harian terasa lebih tenang.
                 </p>
                 <p>
-                  Tujuan kami sederhana: membantu Anda merasa rapi, tenang, dan percaya diri
-                  tanpa harus memakai sesuatu yang terasa terlalu ramai.
+                  Anda bisa merasa rapi, tenang, dan percaya diri tanpa harus memakai sesuatu
+                  yang terasa terlalu ramai.
                 </p>
               </div>
 
@@ -209,7 +209,7 @@ export default function AboutPage() {
                   Jika Anda mencari koleksi yang rapi, lembut, dan terasa premium, Anda bisa mulai dari sini.
                 </h2>
                 <p className="mt-3 max-w-xl text-sm sm:mt-5 sm:max-w-2xl sm:text-lg">
-                  Jelajahi koleksi kami atau hubungi kami jika Anda ingin dibantu pilih model yang paling sesuai.
+                  Jelajahi koleksi ANSLA atau konsultasi jika Anda ingin memilih model yang paling sesuai.
                 </p>
               </div>
 
@@ -222,7 +222,7 @@ export default function AboutPage() {
                 </Button>
                 <Button asChild variant="outline" size="lg" className="h-11 sm:h-12">
                   <Link href="/contact">
-                    Hubungi Kami
+                    Tanya ANSLA
                     <MessageCircleMore className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

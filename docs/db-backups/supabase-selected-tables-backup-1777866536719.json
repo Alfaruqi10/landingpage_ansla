@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-05-04T03:48:52.092Z",
+  "customers": [
+    {
+      "id": "cmoo1crzg0000bdf9tfyxr1uf",
+      "name": "Muhammad Al Faruqi",
+      "email": "alfaruqi752@gmail.com",
+      "phone": "82115586900",
+      "passwordHash": "$2a$10$2zIqpI/xp9OGUzv9j/fzpesQAhEiUkr30SEIoHgYu3k5TLOiC1Tom",
+      "createdAt": "2026-05-02T07:44:10.157Z",
+      "updatedAt": "2026-05-04T03:36:51.902Z"
+    },
+    {
+      "id": "cmoqnf6y40000u8ysdeocr8i8",
+      "name": "muhammad al faruqi",
+      "email": "muhammadalfaruqi64@gmail.com",
+      "phone": "081313063276",
+      "passwordHash": "$2a$10$IqnaUcQ4F0QlG4ivEpe4EOfzWqugRZ8TcgYcPD0FD4uzwmvvyARZy",
+      "createdAt": "2026-05-04T03:37:26.764Z",
+      "updatedAt": "2026-05-04T03:37:26.764Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cmoo27ty50000j9i11fz6ntg1",
+      "name": "Abaya",
+      "slug": "abaya",
+      "imageUrl": "https://abayabuth.com/cdn/shop/files/AB_01_035.jpg?v=1737917356",
+      "sortOrder": 1,
+      "createdAt": "2026-05-02T08:08:18.852Z",
+      "updatedAt": "2026-05-02T08:08:18.852Z"
+    }
+  ],
+  "vouchers": [],
+  "testimonials": [],
+  "faqs": [],
+  "banners": [],
+  "leads": [],
+  "messages": []
+}

@@ -3,6 +3,8 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env.vercel.local
+.env*.local
 !.env.example
 
 node_modules/
@@ -24,3 +26,12 @@ dist/
 build/
 
 *.tsbuildinfo
+
+# IDE & Temporary Preview Files
+.chrome-profile-codex/
+.codex-stitch-ref/
+.codex-homepage-preview.png
+codex-dev.log
+codex-dev.err.log
+dev-server.log
+dev-server.err.log

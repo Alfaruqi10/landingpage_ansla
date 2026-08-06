@@ -460,7 +460,7 @@ export async function ensureQrisPaymentSession(
       message:
         error instanceof Error
           ? error.message
-          : "QRIS otomatis gagal dibuat."
+          : "QRIS otomatis belum bisa dibuka."
     };
   }
 }

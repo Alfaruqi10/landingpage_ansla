@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import type { Category, Product } from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { getProductCollection } from "@/lib/collections";
 import { siteConfig } from "@/lib/site";
 import { buildWhatsAppLink, formatCurrency } from "@/lib/utils";
+
+const SHOPEE_STORE_URL = "https://shopee.co.id/ansla.annisalabel";
 
 type ProductCardProps = {
   product: Product & {
@@ -18,10 +20,7 @@ type ProductCardProps = {
 
 export function ProductCard({ product, mobileCompact = false }: ProductCardProps) {
   const productCollection = getProductCollection(product);
-  const whatsappLink = buildWhatsAppLink(
-    siteConfig.whatsappNumber,
-    `Assalamu'alaikum, saya tertarik dengan ${product.name} dan ingin tanya detailnya.`
-  );
+  const shopeeUrl = SHOPEE_STORE_URL;
   const savingsPercent =
     product.compareAtPrice && product.compareAtPrice > product.price
       ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
@@ -41,6 +40,7 @@ export function ProductCard({ product, mobileCompact = false }: ProductCardProps
           width={640}
           height={800}
           sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          quality={76}
           className="aspect-[4/5] h-full w-full object-cover transition duration-500 hover:scale-105"
         />
       </div>
@@ -93,36 +93,37 @@ export function ProductCard({ product, mobileCompact = false }: ProductCardProps
         <div
           className={
             mobileCompact
-              ? "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3"
-              : "mt-4 grid gap-3 sm:grid-cols-2"
+              ? "mt-4 grid grid-cols-2 gap-2"
+              : "mt-4 grid grid-cols-2 gap-2"
           }
         >
           <Button
             asChild
+            size="sm"
             className={
               mobileCompact
-                ? "h-9 w-full min-w-0 px-3 text-xs whitespace-nowrap"
-                : "w-full min-w-0 px-4 text-xs sm:text-sm"
+                ? "h-9 w-full min-w-0 px-2 text-xs"
+                : "h-9 w-full min-w-0 px-2 text-xs sm:h-10 sm:px-3"
             }
           >
-            <Link href={whatsappLink} target="_blank">
-              <span className="sm:hidden">Tanya WA</span>
-              <span className="hidden sm:inline">Tanya warna & size</span>
+            <Link href={shopeeUrl} target="_blank">
+              <ExternalLink className="mr-1 h-3 w-3" />
+              Beli Shopee
             </Link>
           </Button>
           <Button
             asChild
             variant="outline"
+            size="sm"
             className={
               mobileCompact
-                ? "h-9 w-full min-w-0 px-3 text-xs whitespace-nowrap"
-                : "w-full min-w-0 px-4 text-xs sm:text-sm"
+                ? "h-9 w-full min-w-0 px-2 text-xs"
+                : "h-9 w-full min-w-0 px-2 text-xs sm:h-10 sm:px-3"
             }
           >
             <Link href={`/products/${product.slug}`}>
-              <span className="sm:hidden">Detail</span>
-              <span className="hidden sm:inline">Cek bahan & detail</span>
-              <ArrowRight className={mobileCompact ? "ml-1 h-3.5 w-3.5 sm:ml-2 sm:h-4 sm:w-4" : "ml-2 h-4 w-4"} />
+              Detail
+              <ArrowRight className="ml-1 h-3.5 w-3.5 sm:ml-2 sm:h-4 sm:w-4" />
             </Link>
           </Button>
         </div>

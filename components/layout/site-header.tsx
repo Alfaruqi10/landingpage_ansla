@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Menu, ShoppingBag, UserRound, X } from "lucide-react";
+import { ChevronDown, Menu, UserRound, X } from "lucide-react";
 import { useState } from "react";
 
-import { useCart } from "@/components/cart/cart-provider";
 import { SiteLogo } from "@/components/layout/site-logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,6 @@ export function SiteHeader({
 }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const { cartCount } = useCart();
   const accountHref = customerSession ? "/account" : "/login";
   const accountLabel = customerSession ? "Akun Saya" : "Masuk";
 
@@ -86,16 +84,6 @@ export function SiteHeader({
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <Button asChild variant="ghost" className="relative h-10 w-10 rounded-full px-0">
-              <Link href="/cart" aria-label="Keranjang belanja">
-                <ShoppingBag className="h-4 w-4" />
-                {cartCount > 0 ? (
-                  <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-stone-900 px-1 text-[10px] text-white dark:bg-stone-100 dark:text-stone-900">
-                    {cartCount}
-                  </span>
-                ) : null}
-              </Link>
-            </Button>
             <ThemeToggle />
             <Button asChild variant="ghost" className="gap-2 px-4">
               <Link href={accountHref}>
@@ -178,17 +166,9 @@ export function SiteHeader({
                 ))}
               </div>
               <div className="mt-4 grid gap-3">
-                <Button asChild variant="outline" className="relative w-full">
-                  <Link href="/cart" onClick={() => setIsOpen(false)}>
-                    Keranjang
-                    {cartCount > 0 ? (
-                      <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-stone-900 px-1 text-[10px] text-white">
-                        {cartCount}
-                      </span>
-                    ) : null}
-                  </Link>
-                </Button>
-                <ThemeToggle className="w-full justify-center" />
+                <div className="flex justify-center">
+                  <ThemeToggle />
+                </div>
                 <Button asChild className="w-full">
                   <Link href={accountHref} onClick={() => setIsOpen(false)}>
                     {accountLabel}

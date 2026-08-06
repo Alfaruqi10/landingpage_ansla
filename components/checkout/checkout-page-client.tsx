@@ -12,10 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createOrderAction } from "@/lib/actions/checkout-actions";
-import {
-  resolveTransferDestinationAccount,
-  transferBankOptions
-} from "@/lib/site";
 import { buildWhatsAppLink, formatCurrency } from "@/lib/utils";
 import {
   evaluateVoucherForSubtotal,
@@ -23,16 +19,24 @@ import {
   type SerializableVoucher
 } from "@/lib/vouchers";
 
-const shippingOptions = [
+const fallbackShippingOptions = [
   { value: "Kurir Reguler", label: "Kurir Reguler", price: 18000 },
   { value: "Kurir Express", label: "Kurir Express", price: 35000 },
   { value: "Same Day", label: "Same Day", price: 50000 }
 ];
 
-const basePaymentOptions = [
+const fallbackPaymentOptions = [
   { value: "Transfer Bank", label: "Transfer ke Rekening" },
   { value: "QRIS", label: "QRIS" }
-] as const;
+];
+
+const fallbackBankAccounts = [
+  {
+    bankName: "SeaBank",
+    accountNumber: "901353568694",
+    accountHolder: "Muhammad Al Faruqi"
+  }
+];
 
 const selectClassName =
   "mt-2 flex h-11 w-full rounded-2xl border border-stone-200 bg-white px-4 text-sm text-stone-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
@@ -61,8 +65,29 @@ type CheckoutDraft = {
 };
 
 type InitialCustomerProfile = Pick<CheckoutDraft, "customerName" | "email" | "phone">;
+type CheckoutShippingOption = (typeof fallbackShippingOptions)[number];
+type CheckoutPaymentOption = {
+  value: string;
+  label: string;
+  type?: string;
+};
+type CheckoutBankAccount = (typeof fallbackBankAccounts)[number];
 
-function createDefaultDraft(initialCustomerProfile?: InitialCustomerProfile): CheckoutDraft {
+function createDefaultDraft({
+  initialCustomerProfile,
+  shippingOptions,
+  paymentOptions,
+  bankAccounts
+}: {
+  initialCustomerProfile?: InitialCustomerProfile;
+  shippingOptions: CheckoutShippingOption[];
+  paymentOptions: CheckoutPaymentOption[];
+  bankAccounts: CheckoutBankAccount[];
+}): CheckoutDraft {
+  const fallbackShippingMethod = shippingOptions[0]?.value || fallbackShippingOptions[0].value;
+  const fallbackPaymentMethod = paymentOptions[0]?.value || fallbackPaymentOptions[0].value;
+  const fallbackTransferBank = bankAccounts[0]?.bankName || fallbackBankAccounts[0].bankName;
+
   return {
     email: initialCustomerProfile?.email || "",
     customerName: initialCustomerProfile?.customerName || "",
@@ -70,9 +95,9 @@ function createDefaultDraft(initialCustomerProfile?: InitialCustomerProfile): Ch
     postalCode: "",
     phone: initialCustomerProfile?.phone || "",
     notes: "",
-    shippingMethod: shippingOptions[0].value,
-    paymentMethod: basePaymentOptions[0].value,
-    transferBank: transferBankOptions[0],
+    shippingMethod: fallbackShippingMethod,
+    paymentMethod: fallbackPaymentMethod,
+    transferBank: fallbackTransferBank,
     voucherCode: "",
     selectedProvinceCode: "",
     selectedCityCode: "",
@@ -108,7 +133,10 @@ export function CheckoutPageClient({
   message,
   initialCustomerProfile,
   initialVouchers,
-  isQrisEnabled
+  isQrisEnabled,
+  initialShippingOptions,
+  initialPaymentOptions,
+  initialBankAccounts
 }: {
   mode: "cart" | "buy-now";
   whatsappNumber: string;
@@ -117,22 +145,59 @@ export function CheckoutPageClient({
   initialCustomerProfile?: InitialCustomerProfile;
   initialVouchers: SerializableVoucher[];
   isQrisEnabled: boolean;
+  initialShippingOptions?: CheckoutShippingOption[];
+  initialPaymentOptions?: CheckoutPaymentOption[];
+  initialBankAccounts?: CheckoutBankAccount[];
 }) {
+  const shippingOptions = useMemo(
+    () => {
+      const options = Array.isArray(initialShippingOptions) ? initialShippingOptions : [];
+
+      return options.length > 0 ? options : fallbackShippingOptions;
+    },
+    [initialShippingOptions]
+  );
   const paymentOptions = useMemo(
-    () =>
-      basePaymentOptions.filter((option) =>
+    () => {
+      const options = Array.isArray(initialPaymentOptions) ? initialPaymentOptions : [];
+
+      return (options.length > 0 ? options : fallbackPaymentOptions).filter((option) =>
         option.value === "QRIS" ? isQrisEnabled : true
-      ),
-    [isQrisEnabled]
+      );
+    },
+    [initialPaymentOptions, isQrisEnabled]
+  );
+  const bankAccounts = useMemo(
+    () => {
+      const accounts = Array.isArray(initialBankAccounts) ? initialBankAccounts : [];
+
+      return accounts.length > 0 ? accounts : fallbackBankAccounts;
+    },
+    [initialBankAccounts]
+  );
+  const transferBankOptions = useMemo(
+    () => bankAccounts.map((account) => account.bankName),
+    [bankAccounts]
   );
   const { isReady, items, buyNowItem } = useCart();
   const draftStorageKey = `${draftStorageKeyPrefix}-${mode}`;
   const [draft, setDraft] = useState<CheckoutDraft>(() =>
-    createDefaultDraft(initialCustomerProfile)
+    createDefaultDraft({
+      initialCustomerProfile,
+      shippingOptions,
+      paymentOptions,
+      bankAccounts
+    })
   );
-  const [shippingMethod, setShippingMethod] = useState(shippingOptions[0].value);
-  const [paymentMethod, setPaymentMethod] = useState<string>(basePaymentOptions[0].value);
-  const [transferBank, setTransferBank] = useState<string>(transferBankOptions[0]);
+  const [shippingMethod, setShippingMethod] = useState(
+    shippingOptions[0]?.value || fallbackShippingOptions[0].value
+  );
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    paymentOptions[0]?.value || fallbackPaymentOptions[0].value
+  );
+  const [transferBank, setTransferBank] = useState<string>(
+    transferBankOptions[0] || fallbackBankAccounts[0].bankName
+  );
   const [provinces, setProvinces] = useState<RegionOption[]>([]);
   const [cities, setCities] = useState<RegionOption[]>([]);
   const [districts, setDistricts] = useState<RegionOption[]>([]);
@@ -185,7 +250,15 @@ export function CheckoutPageClient({
   const storedPaymentMethod = isBankTransfer
     ? `Transfer Bank - ${transferBank}`
     : paymentMethod;
-  const transferDestination = resolveTransferDestinationAccount(transferBank);
+  const transferDestination = useMemo(() => {
+    const matchedAccount = bankAccounts.find((account) => account.bankName === transferBank);
+    const fallbackAccount = bankAccounts[0] || fallbackBankAccounts[0];
+
+    return {
+      account: matchedAccount || fallbackAccount,
+      usesFallback: Boolean(transferBank && !matchedAccount)
+    };
+  }, [bankAccounts, transferBank]);
   const requiresPaymentAfterOrder =
     paymentMethod === "Transfer Bank" || paymentMethod === "QRIS";
   const submitLabel = requiresPaymentAfterOrder
@@ -198,7 +271,7 @@ export function CheckoutPageClient({
       return;
     }
 
-    const fallbackPaymentMethod = paymentOptions[0]?.value || basePaymentOptions[0].value;
+    const fallbackPaymentMethod = paymentOptions[0]?.value || fallbackPaymentOptions[0].value;
     setPaymentMethod(fallbackPaymentMethod);
     setDraft((current) => ({
       ...current,
@@ -207,7 +280,38 @@ export function CheckoutPageClient({
   }, [paymentMethod, paymentOptions]);
 
   useEffect(() => {
-    const defaultDraft = createDefaultDraft(initialCustomerProfile);
+    if (shippingOptions.some((option) => option.value === shippingMethod)) {
+      return;
+    }
+
+    const fallbackShippingMethod = shippingOptions[0]?.value || fallbackShippingOptions[0].value;
+    setShippingMethod(fallbackShippingMethod);
+    setDraft((current) => ({
+      ...current,
+      shippingMethod: fallbackShippingMethod
+    }));
+  }, [shippingMethod, shippingOptions]);
+
+  useEffect(() => {
+    if (!isBankTransfer || transferBankOptions.includes(transferBank)) {
+      return;
+    }
+
+    const fallbackTransferBank = transferBankOptions[0] || fallbackBankAccounts[0].bankName;
+    setTransferBank(fallbackTransferBank);
+    setDraft((current) => ({
+      ...current,
+      transferBank: fallbackTransferBank
+    }));
+  }, [isBankTransfer, transferBank, transferBankOptions]);
+
+  useEffect(() => {
+    const defaultDraft = createDefaultDraft({
+      initialCustomerProfile,
+      shippingOptions,
+      paymentOptions,
+      bankAccounts
+    });
 
     try {
       if (!shouldRestoreDraft) {
@@ -233,9 +337,7 @@ export function CheckoutPageClient({
       )
         ? parsedDraft.paymentMethod || defaultDraft.paymentMethod
         : defaultDraft.paymentMethod;
-      const restoredTransferBank = transferBankOptions.includes(
-        (parsedDraft.transferBank || "") as (typeof transferBankOptions)[number]
-      )
+      const restoredTransferBank = transferBankOptions.includes(parsedDraft.transferBank || "")
         ? parsedDraft.transferBank || defaultDraft.transferBank
         : defaultDraft.transferBank;
       const mergedDraft = {
@@ -257,7 +359,15 @@ export function CheckoutPageClient({
     } finally {
       setHasRestoredDraft(true);
     }
-  }, [draftStorageKey, initialCustomerProfile, paymentOptions, shouldRestoreDraft]);
+  }, [
+    bankAccounts,
+    draftStorageKey,
+    initialCustomerProfile,
+    paymentOptions,
+    shippingOptions,
+    shouldRestoreDraft,
+    transferBankOptions
+  ]);
 
   useEffect(() => {
     if (!hasRestoredDraft || hasInitializedVoucherFromDraft) {
@@ -872,7 +982,7 @@ export function CheckoutPageClient({
               </select>
               {!isQrisEnabled ? (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  QRIS sedang kami nonaktifkan sementara sampai integrasi publiknya siap sepenuhnya.
+                  QRIS sedang tidak tersedia sementara. Anda masih bisa memilih metode pembayaran lain.
                 </p>
               ) : null}
             </div>
@@ -939,14 +1049,14 @@ export function CheckoutPageClient({
                     <div className="mt-4 space-y-2 text-sm text-muted-foreground">
                       <p>1. Buat pesanan dari halaman ini.</p>
                       <p>2. Transfer sesuai total yang muncul di ringkasan pesanan.</p>
-                      <p>3. Simpan bukti transfer, lalu tunggu konfirmasi dari tim kami.</p>
+                      <p>3. Simpan bukti transfer, lalu tunggu konfirmasi pesanan.</p>
                     </div>
                   </>
                 ) : (
                   <>
                     <p className="text-sm font-medium text-foreground">Pembayaran via QRIS</p>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Setelah pesanan dibuat, Anda akan langsung masuk ke halaman QRIS otomatis
+                      Setelah pesanan masuk, Anda akan langsung masuk ke halaman QRIS otomatis
                       dengan QR dinamis khusus untuk order ini. Status pesanan akan berubah sendiri
                       begitu pembayaran berhasil diterima.
                     </p>

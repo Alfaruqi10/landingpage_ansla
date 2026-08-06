@@ -3,6 +3,10 @@
 import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
+import {
+  getShippingCostByMethod,
+  isCheckoutPaymentMethodAvailable
+} from "@/lib/checkout-settings";
 import { getCustomerSession } from "@/lib/customer-auth";
 import { isQrisEnabled } from "@/lib/features";
 import { PAYMENT_STATUS } from "@/lib/payment-status";
@@ -18,12 +22,6 @@ import {
   normalizeVoucherCode,
   type SerializableVoucher
 } from "@/lib/vouchers";
-
-const shippingCosts: Record<string, number> = {
-  "Kurir Reguler": 18000,
-  "Kurir Express": 35000,
-  "Same Day": 50000
-};
 
 const paymentProofMarker = "[[payment_proof:";
 
@@ -89,7 +87,7 @@ function buildInitialPaymentStatus(paymentMethod: string, hasPaymentProof: boole
     return PAYMENT_STATUS.PAID;
   }
 
-  if (paymentMethod === "Transfer Bank" && hasPaymentProof) {
+  if (paymentMethod.startsWith("Transfer Bank") && hasPaymentProof) {
     return PAYMENT_STATUS.REVIEW;
   }
 
@@ -109,6 +107,7 @@ function normalizeCheckoutVariantOptions(value: unknown): CheckoutVariantOption[
       const variant = item as {
         name?: unknown;
         stockBySize?: unknown;
+        combinations?: unknown;
         isActive?: unknown;
       };
 
@@ -120,6 +119,35 @@ function normalizeCheckoutVariantOptions(value: unknown): CheckoutVariantOption[
         return null;
       }
 
+      const stockBySizeFromCombinations =
+        Array.isArray(variant.combinations)
+          ? Object.fromEntries(
+              variant.combinations
+                .map((combination) => {
+                  if (!combination || typeof combination !== "object") {
+                    return null;
+                  }
+
+                  const row = combination as {
+                    size?: unknown;
+                    stock?: unknown;
+                    isActive?: unknown;
+                  };
+
+                  if (
+                    typeof row.size !== "string" ||
+                    typeof row.stock !== "number" ||
+                    !Number.isFinite(row.stock) ||
+                    row.isActive === false
+                  ) {
+                    return null;
+                  }
+
+                  return [row.size.trim(), Math.max(0, Math.floor(row.stock))] as const;
+                })
+                .filter((entry): entry is readonly [string, number] => Boolean(entry))
+            )
+          : undefined;
       const stockBySize =
         variant.stockBySize && typeof variant.stockBySize === "object"
           ? Object.fromEntries(
@@ -134,7 +162,7 @@ function normalizeCheckoutVariantOptions(value: unknown): CheckoutVariantOption[
                 )
                 .map(([size, stock]) => [size.trim(), Math.floor(stock as number)])
             )
-          : undefined;
+          : stockBySizeFromCombinations;
 
       return {
         name: variant.name.trim(),
@@ -303,7 +331,17 @@ export async function createOrderAction(formData: FormData) {
   }
 
   const calculatedSubtotal = parsed.data.items.reduce((sum, item) => sum + item.lineTotal, 0);
-  const calculatedShippingCost = shippingCosts[parsed.data.shippingMethod] ?? 0;
+  const calculatedShippingCost = await getShippingCostByMethod(parsed.data.shippingMethod);
+
+  if (calculatedShippingCost === null) {
+    redirect(
+      appendQueryString("/checkout", {
+        status: "error",
+        message: "Metode pengiriman yang dipilih sedang tidak tersedia.",
+        mode: redirectMode
+      })
+    );
+  }
   const matchedVoucher = requestedVoucherCode
     ? await db.voucher.findUnique({
         where: { code: requestedVoucherCode }
@@ -352,6 +390,17 @@ export async function createOrderAction(formData: FormData) {
   const calculatedVoucherDiscount =
     voucherEvaluation && voucherEvaluation.isValid ? voucherEvaluation.discountAmount : 0;
   const calculatedTotal = calculatedSubtotal - calculatedVoucherDiscount + calculatedShippingCost;
+  const isPaymentAvailable = await isCheckoutPaymentMethodAvailable(parsed.data.paymentMethod);
+
+  if (!isPaymentAvailable) {
+    redirect(
+      appendQueryString("/checkout", {
+        status: "error",
+        message: "Metode pembayaran yang dipilih sedang tidak tersedia.",
+        mode: redirectMode
+      })
+    );
+  }
 
   if (parsed.data.paymentMethod === "QRIS" && !isQrisEnabled()) {
     redirect(
@@ -509,7 +558,7 @@ export async function regenerateQrisPaymentAction(formData: FormData) {
   redirect(
     buildPaymentPageHref(orderNumber, token, {
       status: "success",
-      message: "QRIS baru berhasil dibuat."
+      message: "QRIS baru siap digunakan."
     })
   );
 }

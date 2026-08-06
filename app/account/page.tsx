@@ -47,8 +47,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               <p className="section-eyebrow">Akun pelanggan</p>
               <h1 className="mt-3 text-4xl">Halo, {session.name}</h1>
               <p className="mt-3 max-w-2xl">
-                Akun ini dibuat untuk memudahkan repeat order dan merapikan identitas belanja Anda,
-                tanpa mengubah alur checkout cepat yang sudah ada di ANSLA.
+                Data belanja Anda tersimpan lebih rapi, jadi repeat order dan cek riwayat pesanan
+                terasa lebih mudah.
               </p>
             </div>
 

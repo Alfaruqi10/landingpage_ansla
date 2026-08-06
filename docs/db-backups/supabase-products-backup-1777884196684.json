@@ -1,0 +1,70 @@
+[
+  {
+    "id": "cmoo2e16j0002j9i10cnudb2g",
+    "name": "Iriah Dress",
+    "slug": "irish-dress",
+    "featured": true,
+    "price": 200000,
+    "compareAtPrice": 250000,
+    "shortDescription": "Crafted from luxurious soft crush fabric, our abaya with khimar set offers all-day breathability and an airy, lightweight feel that's easy to style.",
+    "description": "Its fuss-free matching khimar and abaya with ruffle sleeves makes it the perfect alternative to the hijab and jilbab. Refined for a sophisticated and exclusive look, this abaya set with khimar is sure to become your go-to everyday outfit.\r\n\r\nThe khimar comes with tie back strings to tie around your head. If you wish to use the unique niqab feature included in the khimar which allows for simple and effortless full coverage, simply lift the fabric from under your chin up to your nose. \r\n\r\nFabric - Polyester - Soft crush and lightweight\r\nThe two layer khimar is included and it is one size. Length at the front approx 34'', Length at the back approx 44''\r\nThe Abaya is included, a farasha style with ruffled sleeves\r\nModel is a UK size 8 and height of 5'8. \r\nHand Wash Only",
+    "imageUrl": "https://abayabuth.com/cdn/shop/files/AB41-008_9cb86efa-d32c-4edf-a898-5b7b3f99b9c6.jpg?v=1705263884",
+    "galleryImages": [],
+    "variantOptions": [
+      {
+        "hex": "#000000",
+        "name": "Hitam",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL",
+          "All Size"
+        ],
+        "imageUrl": "",
+        "isActive": true,
+        "isDefault": true,
+        "totalStock": 18,
+        "stockBySize": {
+          "L": 3,
+          "M": 5,
+          "S": 5,
+          "XL": 3,
+          "XXL": 2,
+          "All Size": 0
+        },
+        "galleryIndexes": []
+      },
+      {
+        "hex": "#5d360e",
+        "name": "Coklat",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL",
+          "All Size"
+        ],
+        "imageUrl": "https://abayabuth.com/cdn/shop/files/AB09-014_49fcddc6-2ea6-4e7e-8e72-58297806ec45.jpg?v=1705250174",
+        "isActive": true,
+        "isDefault": false,
+        "totalStock": 14,
+        "stockBySize": {
+          "L": 2,
+          "M": 2,
+          "S": 5,
+          "XL": 2,
+          "XXL": 3,
+          "All Size": 0
+        },
+        "galleryIndexes": []
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-05-02T08:13:07.234Z",
+    "updatedAt": "2026-05-02T08:13:07.234Z",
+    "categoryId": "cmoo27ty50000j9i11fz6ntg1"
+  }
+]

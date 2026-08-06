@@ -6,6 +6,20 @@ export type ProductSortOption = "latest" | "featured" | "price-asc" | "price-des
 
 const STOREFRONT_REVALIDATE_SECONDS = 300;
 
+function toSortableTimestamp(value: unknown) {
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const timestamp = new Date(value).getTime();
+
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  }
+
+  return 0;
+}
+
 const getCachedHomePageData = unstable_cache(
   async () => {
     const [banners, featuredProducts, categories, testimonials, faqs] = await Promise.all([
@@ -94,20 +108,23 @@ export async function getProductsPageData(
     : allProducts;
 
   const sortedProducts = [...products].sort((left, right) => {
+    const leftCreatedAt = toSortableTimestamp(left.createdAt);
+    const rightCreatedAt = toSortableTimestamp(right.createdAt);
+
     switch (sort) {
       case "featured":
         if (left.featured !== right.featured) {
           return Number(right.featured) - Number(left.featured);
         }
 
-        return right.createdAt.getTime() - left.createdAt.getTime();
+        return rightCreatedAt - leftCreatedAt;
       case "price-asc":
         return left.price - right.price;
       case "price-desc":
         return right.price - left.price;
       case "latest":
       default:
-        return right.createdAt.getTime() - left.createdAt.getTime();
+        return rightCreatedAt - leftCreatedAt;
     }
   });
 

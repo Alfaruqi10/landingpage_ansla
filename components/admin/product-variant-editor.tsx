@@ -6,27 +6,93 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  buildColorId,
+  calculateTotalStock,
+  DEFAULT_PRODUCT_SIZES,
+  generateVariantCombinations,
+  type ProductVariantCombination
+} from "@/lib/product-variation";
 import { cn } from "@/lib/utils";
 
+export type ProductVariantSizeRow = {
+  size: string;
+  stock: number;
+  sku?: string;
+  price?: number | null;
+  isActive?: boolean;
+};
+
 export type ProductVariantEditorItem = {
+  id?: string;
   name: string;
   hex?: string;
   imageUrl?: string;
   galleryIndexes?: number[];
+  sizes?: string[];
   stockBySize?: Record<string, number>;
+  skuBySize?: Record<string, string>;
+  priceBySize?: Record<string, number | null>;
+  sizeRows?: ProductVariantSizeRow[];
+  combinations?: ProductVariantCombination[];
+  variants?: ProductVariantCombination[];
   isDefault?: boolean;
   isActive?: boolean;
 };
 
-const SIZE_OPTIONS = ["S", "M", "L", "XL", "XXL", "All Size"];
+const SIZE_OPTIONS = [...DEFAULT_PRODUCT_SIZES];
+
+function createRowsFromStock(variant?: ProductVariantEditorItem): ProductVariantSizeRow[] {
+  const activeSizes = new Set(
+    (variant?.sizes?.length ? variant.sizes : SIZE_OPTIONS).map((size) => size.trim())
+  );
+  const rowsFromCombinations = variant?.combinations || variant?.variants;
+
+  if (rowsFromCombinations?.length) {
+    return SIZE_OPTIONS.map((size) => {
+      const existing = rowsFromCombinations.find((row) => row.size === size);
+
+      return {
+        size,
+        stock: Math.max(0, Math.floor(Number(existing?.stock ?? 0))),
+        sku: existing?.sku || "",
+        price: existing?.price ?? null,
+        isActive: existing?.isActive ?? activeSizes.has(size)
+      };
+    });
+  }
+
+  if (variant?.sizeRows?.length) {
+    return SIZE_OPTIONS.map((size) => {
+      const existing = variant.sizeRows?.find((row) => row.size === size);
+
+      return {
+        size,
+        stock: Math.max(0, Math.floor(Number(existing?.stock ?? variant.stockBySize?.[size] ?? 0))),
+        sku: existing?.sku || variant.skuBySize?.[size] || "",
+        price: existing?.price ?? variant.priceBySize?.[size] ?? null,
+        isActive: existing?.isActive ?? activeSizes.has(size)
+      };
+    });
+  }
+
+  return SIZE_OPTIONS.map((size) => ({
+    size,
+    stock: Math.max(0, Math.floor(Number(variant?.stockBySize?.[size] ?? 0))),
+    sku: variant?.skuBySize?.[size] || "",
+    price: variant?.priceBySize?.[size] ?? null,
+    isActive: activeSizes.has(size)
+  }));
+}
 
 function createEmptyVariant(): ProductVariantEditorItem {
   return {
+    id: "",
     name: "",
     hex: "#2f2a25",
     imageUrl: "",
     galleryIndexes: [],
-    stockBySize: Object.fromEntries(SIZE_OPTIONS.map((size) => [size, 0])),
+    sizeRows: createRowsFromStock(),
     isDefault: false,
     isActive: true
   };
@@ -44,18 +110,29 @@ function parseGalleryIndexes(value: string) {
 }
 
 function normalizeInitialVariant(variant: ProductVariantEditorItem, index: number) {
-  const stockBySize = Object.fromEntries(
-    SIZE_OPTIONS.map((size) => [size, Number(variant.stockBySize?.[size] ?? 0)])
-  );
-
   return {
     ...createEmptyVariant(),
     ...variant,
+    id: variant.id || "",
     hex: variant.hex || "#2f2a25",
-    stockBySize,
+    sizeRows: createRowsFromStock(variant),
     isDefault: Boolean(variant.isDefault) || index === 0,
     isActive: variant.isActive ?? true
   };
+}
+
+function normalizeStock(value: string | number) {
+  const stock = Number(value);
+  return Number.isFinite(stock) ? Math.max(0, Math.floor(stock)) : 0;
+}
+
+function normalizeOptionalPrice(value: string | number | null | undefined) {
+  if (value === "" || value === null || value === undefined) {
+    return null;
+  }
+
+  const price = Number(value);
+  return Number.isFinite(price) && price >= 0 ? Math.floor(price) : null;
 }
 
 export function ProductVariantEditor({
@@ -81,34 +158,102 @@ export function ProductVariantEditor({
     }));
   });
 
-  const serializedVariants = useMemo(
-    () => {
-      const defaultIndex = Math.max(
-        0,
-        variants.findIndex((variant) => variant.isDefault)
-      );
+  const serializedVariants = useMemo(() => {
+    const defaultIndex = Math.max(
+      0,
+      variants.findIndex((variant) => variant.isDefault)
+    );
 
-      return JSON.stringify(
-        variants
-          .map((variant, index) => ({
+    return JSON.stringify(
+      variants
+        .map((variant, index) => {
+          const colorId = buildColorId(
+            { id: variant.id, name: variant.name },
+            index
+          );
+          const activeRows = (variant.sizeRows || []).filter((row) => row.isActive !== false);
+          const sizes = activeRows.map((row) => row.size);
+          const stockBySize = Object.fromEntries(
+            (variant.sizeRows || []).map((row) => [row.size, normalizeStock(row.stock)])
+          );
+          const skuBySize = Object.fromEntries(
+            (variant.sizeRows || [])
+              .filter((row) => row.sku?.trim())
+              .map((row) => [row.size, row.sku?.trim() || ""])
+          );
+          const priceBySize = Object.fromEntries(
+            (variant.sizeRows || [])
+              .filter((row) => row.price !== null && row.price !== undefined)
+              .map((row) => [row.size, normalizeOptionalPrice(row.price)])
+          );
+          const combinations = generateVariantCombinations(
+            [
+              {
+                id: colorId,
+                name: variant.name,
+                hex: variant.hex,
+                imageUrl: variant.imageUrl,
+                galleryIndexes: variant.galleryIndexes,
+                isActive: variant.isActive
+              }
+            ],
+            activeRows.map((row) => ({ name: row.size, isActive: row.isActive })),
+            (variant.sizeRows || []).map((row) => ({
+              id: `${colorId}__${row.size.toLowerCase().replace(/\s+/g, "-")}`,
+              colorId,
+              colorName: variant.name.trim(),
+              size: row.size,
+              stock: normalizeStock(row.stock),
+              sku: row.sku?.trim() || "",
+              price: normalizeOptionalPrice(row.price),
+              isActive: row.isActive !== false
+            }))
+          );
+
+          return {
+            id: colorId,
             name: variant.name.trim(),
             hex: variant.hex || "",
             imageUrl: variant.imageUrl?.trim() || "",
             galleryIndexes: variant.galleryIndexes || [],
-            stockBySize: Object.fromEntries(
-              SIZE_OPTIONS.map((size) => [
-                size,
-                Math.max(0, Math.floor(Number(variant.stockBySize?.[size] || 0)))
-              ])
-            ),
+            sizes,
+            stockBySize,
+            skuBySize,
+            priceBySize,
+            combinations,
+            totalStock: calculateTotalStock(combinations),
+            stockStatus: calculateTotalStock(combinations) > 0 ? "Tersedia" : "Habis",
             isDefault: index === defaultIndex,
             isActive: variant.isActive ?? true
-          }))
-          .filter((variant) => variant.name.length > 0)
+          };
+        })
+        .filter((variant) => variant.name.length > 0)
+    );
+  }, [variants]);
+
+  const grandTotalStock = useMemo(() => {
+    return variants.reduce((total, variant, index) => {
+      const colorId = buildColorId({ id: variant.id, name: variant.name }, index);
+      const combinations = generateVariantCombinations(
+        [{ id: colorId, name: variant.name, isActive: variant.isActive }],
+        (variant.sizeRows || [])
+          .filter((row) => row.isActive !== false)
+          .map((row) => ({ name: row.size, isActive: row.isActive })),
+        (variant.sizeRows || []).map((row) => ({
+          id: `${colorId}__${row.size.toLowerCase().replace(/\s+/g, "-")}`,
+          colorId,
+          colorName: variant.name.trim(),
+          size: row.size,
+          stock: normalizeStock(row.stock),
+          sku: row.sku?.trim() || "",
+          price: normalizeOptionalPrice(row.price),
+          isActive: row.isActive !== false
+        }))
       );
-    },
-    [variants]
-  );
+
+      return total + calculateTotalStock(combinations);
+    }, 0);
+  }, [variants]);
 
   function updateVariant(index: number, nextValue: Partial<ProductVariantEditorItem>) {
     setVariants((current) =>
@@ -118,21 +263,24 @@ export function ProductVariantEditor({
     );
   }
 
-  function updateStock(index: number, size: string, value: string) {
-    const stock = Math.max(0, Math.floor(Number(value || 0)));
-
+  function updateSizeRow(
+    index: number,
+    size: string,
+    nextValue: Partial<ProductVariantSizeRow>
+  ) {
     setVariants((current) =>
-      current.map((variant, variantIndex) =>
-        variantIndex === index
-          ? {
-              ...variant,
-              stockBySize: {
-                ...variant.stockBySize,
-                [size]: Number.isFinite(stock) ? stock : 0
-              }
-            }
-          : variant
-      )
+      current.map((variant, variantIndex) => {
+        if (variantIndex !== index) {
+          return variant;
+        }
+
+        return {
+          ...variant,
+          sizeRows: (variant.sizeRows || createRowsFromStock()).map((row) =>
+            row.size === size ? { ...row, ...nextValue } : row
+          )
+        };
+      })
     );
   }
 
@@ -158,9 +306,19 @@ export function ProductVariantEditor({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-foreground">Warna dan stok size</p>
+          <p className="text-sm font-medium text-foreground">Warna dan kombinasi size</p>
           <p className="text-xs text-muted-foreground">
-            Setiap warna punya stok sendiri untuk S, M, L, XL, XXL, dan All Size.
+            Sistem otomatis membuat kombinasi warna + size. Stok lama tetap aman saat warna atau
+            size diaktifkan.
+          </p>
+          <p
+            className={cn(
+              "mt-2 text-xs",
+              grandTotalStock > 0 ? "text-muted-foreground" : "text-amber-600"
+            )}
+          >
+            Total stok aktif: {grandTotalStock}
+            {grandTotalStock <= 0 ? " - isi stok sebelum produk dipublish." : ""}
           </p>
         </div>
         <Button
@@ -176,8 +334,8 @@ export function ProductVariantEditor({
 
       <div className="space-y-3">
         {variants.map((variant, index) => {
-          const totalStock = SIZE_OPTIONS.reduce(
-            (total, size) => total + Number(variant.stockBySize?.[size] || 0),
+          const totalStock = (variant.sizeRows || []).reduce(
+            (total, row) => total + (row.isActive !== false ? normalizeStock(row.stock) : 0),
             0
           );
 
@@ -186,7 +344,7 @@ export function ProductVariantEditor({
               key={index}
               className="rounded-[1.15rem] border border-border/80 bg-background/55 p-4"
             >
-              <div className="grid gap-3 xl:grid-cols-[minmax(160px,0.9fr)_92px_minmax(180px,1.2fr)_130px]">
+              <div className="grid gap-3">
                 <div>
                   <Label htmlFor={`variant-${index}-name`}>Nama warna</Label>
                   <div className="mt-2 flex items-center gap-2">
@@ -216,7 +374,7 @@ export function ProductVariantEditor({
                 </div>
 
                 <div>
-                  <Label htmlFor={`variant-${index}-image`}>Gambar warna</Label>
+                  <Label htmlFor={`variant-${index}-image`}>Gambar utama warna</Label>
                   <div className="mt-2 flex items-center gap-2">
                     <ImageIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
                     <Input
@@ -229,7 +387,7 @@ export function ProductVariantEditor({
                 </div>
 
                 <div>
-                  <Label htmlFor={`variant-${index}-gallery`}>No. galeri</Label>
+                  <Label htmlFor={`variant-${index}-gallery`}>Foto tambahan warna</Label>
                   <Input
                     id={`variant-${index}-gallery`}
                     value={(variant.galleryIndexes || []).join(",")}
@@ -241,35 +399,85 @@ export function ProductVariantEditor({
                     className="mt-2"
                     placeholder="1,2"
                   />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Nomor foto dari Galeri produk.
+                  </p>
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
-                {SIZE_OPTIONS.map((size) => (
-                  <div key={size} className="min-w-0">
-                    <Label
-                      htmlFor={`variant-${index}-${size}`}
-                      className="block truncate text-xs text-muted-foreground"
-                    >
-                      {size}
-                    </Label>
-                    <Input
-                      id={`variant-${index}-${size}`}
-                      type="number"
-                      min={0}
-                      value={variant.stockBySize?.[size] ?? 0}
-                      onChange={(event) => updateStock(index, size, event.target.value)}
-                      className="mt-1 text-center"
-                    />
+              <div className="mt-4 overflow-x-auto rounded-[1rem] border border-border/70">
+                <div className="min-w-[600px]">
+                  <div className="grid grid-cols-[86px_84px_minmax(120px,1fr)_minmax(136px,1fr)] gap-2 bg-[hsl(var(--accent)/0.35)] px-3 py-2 text-xs font-medium text-muted-foreground">
+                    <span>Size</span>
+                    <span>Stok</span>
+                    <span>SKU opsional</span>
+                    <span>Harga opsional</span>
                   </div>
-                ))}
+                  <div className="divide-y divide-border/70">
+                    {(variant.sizeRows || []).map((row) => (
+                      <div
+                        key={row.size}
+                        className={cn(
+                          "grid grid-cols-[86px_84px_minmax(120px,1fr)_minmax(136px,1fr)] gap-2 px-3 py-2",
+                          row.isActive === false && "opacity-55"
+                        )}
+                      >
+                        <label className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={row.isActive !== false}
+                            onChange={(event) =>
+                              updateSizeRow(index, row.size, { isActive: event.target.checked })
+                            }
+                            className="h-4 w-4 shrink-0"
+                          />
+                          <span className="truncate">{row.size}</span>
+                        </label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={row.stock}
+                          onChange={(event) =>
+                            updateSizeRow(index, row.size, {
+                              stock: normalizeStock(event.target.value)
+                            })
+                          }
+                          className="h-9 text-center"
+                          disabled={row.isActive === false}
+                        />
+                        <Input
+                          value={row.sku || ""}
+                          onChange={(event) =>
+                            updateSizeRow(index, row.size, { sku: event.target.value })
+                          }
+                          className="h-9"
+                          placeholder="SKU"
+                          disabled={row.isActive === false}
+                        />
+                        <Input
+                          type="number"
+                          min={0}
+                          value={row.price ?? ""}
+                          onChange={(event) =>
+                            updateSizeRow(index, row.size, {
+                              price: normalizeOptionalPrice(event.target.value)
+                            })
+                          }
+                          className="h-9"
+                          placeholder="Kosong = harga utama"
+                          disabled={row.isActive === false}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="mt-4 flex flex-col gap-3 border-t border-border/70 pt-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-2">
                     <Palette className="h-4 w-4" />
-                    Total stok: {totalStock}
+                    Total stok warna: {totalStock}
                   </span>
                   <label className="inline-flex items-center gap-2">
                     <input
@@ -291,6 +499,9 @@ export function ProductVariantEditor({
                     />
                     Aktif
                   </label>
+                  {totalStock <= 0 && variant.isActive !== false ? (
+                    <span className="text-amber-600">Stok warna ini masih 0</span>
+                  ) : null}
                 </div>
 
                 <Button

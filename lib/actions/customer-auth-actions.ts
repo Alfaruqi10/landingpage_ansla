@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { db } from "@/lib/db";
 import {
   authenticateCustomer,
   clearCustomerSession,
@@ -9,7 +10,11 @@ import {
   registerCustomer
 } from "@/lib/customer-auth";
 import { appendQueryString, toOptionalString, toRequiredString } from "@/lib/utils";
-import { customerLoginSchema, customerRegisterSchema } from "@/lib/validations";
+import {
+  customerLoginSchema,
+  customerRegisterSchema,
+  forgotPasswordRequestSchema
+} from "@/lib/validations";
 
 export async function customerLoginAction(formData: FormData) {
   const email = toRequiredString(formData.get("email"));
@@ -86,7 +91,7 @@ export async function customerRegisterAction(formData: FormData) {
     redirect(
       appendQueryString("/register", {
         status: "error",
-        message: result.error || "Akun belum berhasil dibuat."
+        message: result.error || "Akun belum berhasil aktif."
       })
     );
   }
@@ -100,7 +105,7 @@ export async function customerRegisterAction(formData: FormData) {
   redirect(
     appendQueryString("/account", {
       status: "success",
-      message: "Akun berhasil dibuat dan siap dipakai."
+      message: "Akun berhasil aktif dan siap dipakai."
     })
   );
 }
@@ -111,6 +116,50 @@ export async function customerLogoutAction() {
     appendQueryString("/login", {
       status: "success",
       message: "Anda sudah keluar dari akun."
+    })
+  );
+}
+
+export async function requestCustomerPasswordResetAction(formData: FormData) {
+  const email = toRequiredString(formData.get("email"));
+  const phone = toOptionalString(formData.get("phone"));
+
+  const parsed = forgotPasswordRequestSchema.safeParse({
+    email,
+    phone
+  });
+
+  if (!parsed.success) {
+    redirect(
+      appendQueryString("/forgot-password", {
+        status: "error",
+        message: parsed.error.issues[0]?.message || "Data permintaan reset belum valid."
+      })
+    );
+  }
+
+  const normalizedEmail = parsed.data.email.toLowerCase();
+  const customer = await db.customerUser.findUnique({
+    where: { email: normalizedEmail }
+  });
+
+  if (customer) {
+    await db.contactMessage.create({
+      data: {
+        name: customer.name || "Permintaan reset kata sandi",
+        email: normalizedEmail,
+        phone: parsed.data.phone || customer.phone || null,
+        message:
+          "Permintaan reset kata sandi pelanggan. Mohon bantu tindak lanjut untuk pemulihan akses akun."
+      }
+    });
+  }
+
+  redirect(
+    appendQueryString("/forgot-password", {
+      status: "success",
+      message:
+        "Jika email terdaftar, permintaan reset sudah masuk. Untuk bantuan lebih cepat, Anda juga bisa lanjut lewat WhatsApp."
     })
   );
 }

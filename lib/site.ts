@@ -161,7 +161,7 @@ export const siteConfig = {
     {
       title: "Terlihat rapi tanpa terasa berlebihan",
       description:
-        "Pilihan warna, tekstur, dan potongan dibuat supaya Anda terlihat anggun tanpa perlu styling yang rumit."
+        "Pilihan warna, tekstur, dan potongan membantu Anda terlihat anggun tanpa perlu styling yang rumit."
     },
     {
       title: "Nyaman dipakai lebih lama",
@@ -171,7 +171,7 @@ export const siteConfig = {
     {
       title: "Mudah dipilih dan mudah diorder",
       description:
-        "Setiap halaman dibuat agar Anda cepat menemukan model yang cocok lalu langsung lanjut checkout atau konsultasi."
+        "Anda bisa cepat menemukan model yang cocok, lalu langsung lanjut checkout atau konsultasi."
     }
   ]
 } as const;

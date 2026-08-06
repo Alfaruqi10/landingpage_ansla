@@ -17,7 +17,7 @@ import { buildWhatsAppLink } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Login Pelanggan",
   description:
-    "Masuk ke akun ANSLA untuk mempercepat repeat order, menyimpan data Anda, dan melihat riwayat pesanan."
+    "Masuk ke akun ANSLA untuk melihat akun dan riwayat pesanan Anda."
 };
 
 type LoginPageProps = {
@@ -48,11 +48,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <ThemeToggle />
           </div>
 
-          <p className="section-eyebrow">Masuk ke akun ANSLA</p>
-          <h2 className="mt-3 text-4xl">Selamat datang kembali</h2>
+          <h2 className="mt-3 text-4xl">Masuk</h2>
           <p className="mt-3 max-w-2xl">
-            Masukkan email dan password Anda untuk melihat akun dan riwayat order yang memakai
-            email yang sama.
+            Masuk atau buat akun untuk melanjutkan.
           </p>
 
           <StatusBanner
@@ -74,7 +72,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="password">Password</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-stone-600 transition hover:text-stone-900"
+                >
+                  Lupa kata sandi?
+                </Link>
+              </div>
               <Input
                 id="password"
                 name="password"
@@ -86,29 +92,29 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
             <Button type="submit" className="w-full">
               <LogIn className="mr-2 h-4 w-4" />
-              Masuk ke Akun
+              Masuk
             </Button>
           </form>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Button asChild variant="outline">
               <Link href="/register">
-                Buat Akun Baru
+                Buat Akun
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild variant="ghost">
-              <Link href="/checkout">Lanjut Checkout Tanpa Login</Link>
+              <Link href="/checkout">Lanjut Tanpa Login</Link>
             </Button>
           </div>
 
           <div className="mt-8 rounded-[1.5rem] border border-stone-200/80 bg-stone-50 p-5">
             <div className="flex items-center gap-3 text-stone-900">
               <Sparkles className="h-4 w-4" />
-              <p className="font-medium">Butuh bantuan masuk atau daftar?</p>
+              <p className="font-medium">Butuh bantuan?</p>
             </div>
             <p className="mt-2 text-sm text-stone-600">
-              Kalau Anda ingin dibantu lebih cepat, tim ANSLA bisa arahkan lewat WhatsApp.
+              Jika ada kendala login atau pendaftaran, tim ANSLA siap bantu lewat WhatsApp.
             </p>
             <Button asChild variant="outline" className="mt-4">
               <Link href={whatsappLink} target="_blank">

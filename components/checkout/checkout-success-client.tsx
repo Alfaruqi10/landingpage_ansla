@@ -6,25 +6,29 @@ import { CheckCircle2 } from "lucide-react";
 
 import { useCart } from "@/components/cart/cart-provider";
 import { Button } from "@/components/ui/button";
-import {
-  parseSelectedTransferBank,
-  resolveTransferDestinationAccount,
-  siteConfig
-} from "@/lib/site";
+import { parseSelectedTransferBank, siteConfig } from "@/lib/site";
 import { buildWhatsAppLink } from "@/lib/utils";
+
+type CheckoutBankAccount = {
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+};
 
 export function CheckoutSuccessClient({
   mode,
   orderNumber,
   paymentMethod,
   paymentProofState,
-  hasSettledPayment
+  hasSettledPayment,
+  bankAccounts
 }: {
   mode?: string;
   orderNumber?: string;
   paymentMethod?: string;
   paymentProofState?: string;
   hasSettledPayment?: boolean;
+  bankAccounts: CheckoutBankAccount[];
 }) {
   const { clearCart, clearBuyNow } = useCart();
   const isBankTransfer = paymentMethod?.startsWith("Transfer Bank") ?? false;
@@ -32,7 +36,14 @@ export function CheckoutSuccessClient({
   const requiresPaymentConfirmation = (isBankTransfer || isQrisPayment) && !hasSettledPayment;
   const hasUploadedPaymentProof = paymentProofState === "uploaded";
   const selectedTransferBank = parseSelectedTransferBank(paymentMethod);
-  const transferDestination = resolveTransferDestinationAccount(selectedTransferBank);
+  const fallbackAccount = bankAccounts[0] || siteConfig.paymentAccount;
+  const matchedAccount = bankAccounts.find(
+    (account) => account.bankName.toLowerCase() === selectedTransferBank.toLowerCase()
+  );
+  const transferDestination = {
+    account: matchedAccount || fallbackAccount,
+    usesFallback: Boolean(selectedTransferBank && !matchedAccount)
+  };
   const paymentConfirmationLink = buildWhatsAppLink(
     siteConfig.whatsappNumber,
     [
@@ -81,27 +92,27 @@ export function CheckoutSuccessClient({
           ? "Menunggu verifikasi pembayaran"
           : requiresPaymentConfirmation
             ? "Menunggu pembayaran"
-            : "Pesanan berhasil dibuat"}
+            : "Pesanan berhasil masuk"}
       </p>
       <h1 className="mt-3 text-4xl">
         {hasSettledPayment
           ? "Pembayaran QRIS Anda sudah masuk"
           : hasUploadedPaymentProof
-          ? "Bukti pembayaran Anda sudah kami terima"
+          ? "Bukti pembayaran Anda sudah masuk"
           : requiresPaymentConfirmation
-          ? "Pesanan Anda sudah dibuat, tinggal selesaikan pembayaran"
-          : "Pesanan Anda sudah kami terima"}
+          ? "Pesanan Anda sudah masuk, tinggal selesaikan pembayaran"
+          : "Pesanan Anda sudah masuk"}
       </h1>
       <p className="mt-4 text-lg text-muted-foreground">
         {hasSettledPayment
-          ? "Pembayaran sudah kami terima otomatis. Pesanan Anda siap lanjut ke proses admin dan pengemasan."
+          ? "Pembayaran sudah masuk otomatis. Pesanan Anda siap lanjut ke proses admin dan pengemasan."
           : hasUploadedPaymentProof
-          ? "Tim kami akan memeriksa bukti pembayaran Anda terlebih dulu. Setelah pembayaran terverifikasi, pesanan akan lanjut diproses."
+          ? "Bukti pembayaran Anda akan dicek terlebih dulu. Setelah pembayaran terverifikasi, pesanan akan lanjut diproses."
           : isBankTransfer
-          ? "Pesanan belum dianggap selesai sampai pembayaran Anda kami terima. Silakan transfer sesuai total belanja, lalu kirim bukti transfer agar tim kami bisa memproses order ini."
+          ? "Pesanan belum selesai sampai pembayaran diterima. Silakan transfer sesuai total belanja, lalu kirim bukti transfer agar order bisa segera diproses."
           : isQrisPayment
-            ? "Pesanan belum dianggap selesai sampai pembayaran QRIS diterima. Lanjutkan pembayaran lebih dulu, lalu kirim konfirmasi agar tim kami bisa memproses order ini."
-            : "Tim kami akan meninjau pesanan Anda dan menghubungi Anda bila ada konfirmasi lanjutan."}
+            ? "Pesanan belum selesai sampai pembayaran QRIS diterima. Lanjutkan pembayaran lebih dulu, lalu kirim konfirmasi agar order bisa segera diproses."
+            : "Pesanan Anda akan ditinjau dan Anda akan dihubungi bila ada konfirmasi lanjutan."}
       </p>
       {orderNumber ? (
         <div className="mt-6 rounded-[1.3rem] border border-border/70 bg-[hsl(var(--background)/0.45)] px-5 py-4">
@@ -132,7 +143,7 @@ export function CheckoutSuccessClient({
           <div className="mt-4 space-y-2 text-sm text-muted-foreground">
             <p>1. Transfer sesuai total belanja Anda.</p>
             <p>2. Simpan bukti transfer Anda.</p>
-            <p>3. Kirim konfirmasi pembayaran agar tim kami bisa cek dan lanjut proses pesanan.</p>
+            <p>3. Kirim konfirmasi pembayaran agar pesanan bisa lanjut diproses.</p>
           </div>
         </div>
       ) : null}

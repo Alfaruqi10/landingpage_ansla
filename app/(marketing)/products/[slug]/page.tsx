@@ -72,7 +72,7 @@ export default async function ProductDetailPage({
       : undefined;
   return (
     <>
-      <section>
+      <section className="pb-20">
         <div className="container">
           <Reveal className="mb-6">
             <div className="surface-panel px-4 py-3 sm:px-6 sm:py-4">
@@ -96,19 +96,7 @@ export default async function ProductDetailPage({
           </Reveal>
 
           <Reveal>
-            <ProductDetailExperience product={product} whatsappNumber={siteConfig.whatsappNumber} />
-          </Reveal>
-
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-            <Reveal>
-              <div className="surface-panel rounded-[1.5rem] border border-border/80 bg-[hsl(var(--secondary)/0.45)] p-5 sm:p-8">
-                <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                  Deskripsi Produk
-                </p>
-                <p className="mt-4">{product.description}</p>
-              </div>
-            </Reveal>
-            <Reveal delay={0.05}>
+            <ProductDetailExperience product={product} whatsappNumber={siteConfig.whatsappNumber}>
               <div className="rounded-[1.5rem] border border-stone-200 bg-white p-4 sm:p-5">
                 <StatusBanner
                   className="mb-4"
@@ -119,15 +107,15 @@ export default async function ProductDetailPage({
                   source="product-detail"
                   redirectTo={`/products/${product.slug}`}
                   title="Masih ingin tanya dulu?"
-                  description="Tinggalkan email atau nomor WhatsApp agar kami bisa bantu kirim katalog dan rekomendasi ukuran."
+                  description="Tinggalkan email atau nomor WhatsApp untuk mendapat katalog dan rekomendasi ukuran."
                   compact
                 />
               </div>
-            </Reveal>
-          </div>
+            </ProductDetailExperience>
+          </Reveal>
 
           {relatedProducts.length > 0 ? (
-            <div className="mt-12 pb-20 sm:mt-16">
+            <div className="mt-12 sm:mt-16">
               <Reveal>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>

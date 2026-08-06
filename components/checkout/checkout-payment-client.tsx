@@ -311,7 +311,7 @@ export function CheckoutPaymentClient({
               </div>
               <p className="mt-5 text-2xl text-foreground">Pembayaran berhasil diterima</p>
               <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                Kami sedang mengarahkan Anda ke halaman sukses pembayaran.
+                Anda sedang diarahkan ke halaman sukses pembayaran.
               </p>
             </>
           ) : (
@@ -322,7 +322,7 @@ export function CheckoutPaymentClient({
               <p className="mt-5 text-2xl text-foreground">QRIS belum siap ditampilkan</p>
               <p className="mt-2 max-w-md text-sm text-muted-foreground">
                 Biasanya ini terjadi karena sesi pembayaran belum terbentuk, sudah kedaluwarsa,
-                atau perlu dibuat ulang.
+                atau perlu dibuka ulang.
               </p>
             </>
           )}

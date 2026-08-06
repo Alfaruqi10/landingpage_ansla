@@ -47,7 +47,7 @@ export async function createLeadAction(formData: FormData) {
     buildPublicRedirect(formData, {
       form: "lead",
       status: "success",
-      message: "Terima kasih. Tim kami akan segera menghubungi Anda."
+      message: "Terima kasih. Rekomendasi koleksi akan segera dikirimkan ke kontak Anda."
     })
   );
 }
@@ -85,7 +85,7 @@ export async function createContactMessageAction(formData: FormData) {
     buildPublicRedirect(formData, {
       form: "contact",
       status: "success",
-      message: "Pesan Anda sudah terkirim. Kami akan segera membalas."
+      message: "Pesan Anda sudah terkirim. Balasan akan dikirimkan ke kontak yang Anda cantumkan."
     })
   );
 }

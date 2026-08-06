@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { getAdminCheckoutSettings } from "@/lib/checkout-settings";
 
 function startOfDay(date: Date) {
   const nextDate = new Date(date);
@@ -231,4 +232,31 @@ export async function getAdminOrdersPageData() {
       >;
     }
   >;
+}
+
+export async function getAdminCustomersPageData() {
+  return db.customerUser.findMany({
+    include: {
+      _count: {
+        select: {
+          orders: true
+        }
+      },
+      orders: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: {
+          orderNumber: true,
+          total: true,
+          status: true,
+          createdAt: true
+        }
+      }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+}
+
+export async function getAdminCheckoutSettingsPageData() {
+  return getAdminCheckoutSettings();
 }

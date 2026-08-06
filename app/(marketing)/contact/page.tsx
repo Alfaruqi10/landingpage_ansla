@@ -23,7 +23,7 @@ import { buildWhatsAppLink } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Kontak",
   description:
-    "Hubungi kami untuk tanya koleksi, ukuran, bahan, atau bantuan order yang paling sesuai dengan kebutuhan Anda."
+    "Tanya ANSLA untuk koleksi, ukuran, bahan, atau bantuan order yang paling sesuai dengan kebutuhan Anda."
 };
 
 type ContactPageProps = {
@@ -59,7 +59,7 @@ const assurances = [
   {
     icon: Clock3,
     title: "Respons cepat",
-    text: "Tim kami akan membalas secepat mungkin pada jam operasional."
+    text: "Anda bisa mendapat jawaban lebih cepat pada jam operasional."
   },
   {
     icon: ShieldCheck,
@@ -112,9 +112,9 @@ export default function ContactPage({ searchParams }: ContactPageProps) {
           <Reveal className="surface-panel overflow-hidden p-5 sm:p-8 lg:p-10">
             <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
               <div>
-                <p className="section-eyebrow">Hubungi Kami</p>
+                <p className="section-eyebrow">Tanya ANSLA</p>
                 <h1 className="mt-3 max-w-[12ch] text-balance text-3xl leading-[1.04] sm:mt-4 sm:max-w-4xl sm:text-5xl lg:text-6xl">
-                  Ceritakan kebutuhan Anda, lalu kami bantu arahkan ke pilihan yang lebih pas.
+                  Ceritakan kebutuhan Anda untuk menemukan pilihan yang lebih pas.
                 </h1>
                 <p className="mt-3 max-w-xl text-sm sm:mt-5 sm:max-w-2xl sm:text-lg">
                   Anda bisa tanya soal model, ukuran, bahan, warna, atau cara order yang paling nyaman.
@@ -149,7 +149,7 @@ export default function ContactPage({ searchParams }: ContactPageProps) {
               <div className="surface-panel p-5 sm:p-8">
                 <p className="section-eyebrow">Pilihan Kontak</p>
                 <h2 className="mt-3 max-w-md text-balance text-2xl leading-[1.08] sm:mt-4 sm:text-4xl">
-                  Pilih cara yang paling nyaman untuk menghubungi kami.
+                  Pilih cara yang paling nyaman untuk menghubungi ANSLA.
                 </h2>
                 <p className="mt-3 max-w-lg sm:mt-4">
                   Kalau Anda ingin jawaban paling cepat, WhatsApp biasanya jadi pilihan yang paling praktis.
@@ -219,7 +219,7 @@ export default function ContactPage({ searchParams }: ContactPageProps) {
                   Tulis kebutuhan Anda di sini.
                 </h2>
                 <p className="mt-3 sm:mt-4">
-                  Kami akan bantu jawab pertanyaan soal produk, ukuran, bahan, atau alur pemesanan yang paling pas untuk Anda.
+                  Tanyakan produk, ukuran, bahan, atau alur pemesanan yang paling pas untuk Anda.
                 </p>
               </div>
 

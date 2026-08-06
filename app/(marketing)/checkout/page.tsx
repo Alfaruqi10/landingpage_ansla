@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { CheckoutPageClient } from "@/components/checkout/checkout-page-client";
 import { PageHero } from "@/components/shared/page-hero";
 import { getCustomerSession } from "@/lib/customer-auth";
+import { getCheckoutSettings } from "@/lib/checkout-settings";
 import { db } from "@/lib/db";
 import { isQrisEnabled } from "@/lib/features";
 import { siteConfig } from "@/lib/site";
@@ -24,7 +25,7 @@ type CheckoutPageProps = {
 export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
   const mode = searchParams?.mode === "buy-now" ? "buy-now" : "cart";
   const customerSession = await getCustomerSession();
-  const [customer, vouchers] = await Promise.all([
+  const [customer, vouchers, checkoutSettings] = await Promise.all([
     customerSession
       ? db.customerUser.findUnique({
           where: { id: customerSession.sub },
@@ -38,7 +39,8 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
     db.voucher.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" }
-    })
+    }),
+    getCheckoutSettings()
   ]);
   const serializableVouchers: SerializableVoucher[] = vouchers.map((voucher) => ({
     id: voucher.id,
@@ -59,7 +61,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
       <PageHero
         eyebrow="Checkout"
         title="Selesaikan pesanan Anda dengan cara yang paling nyaman"
-        description="Isi alamat pengiriman, pilih metode bayar, lalu lanjutkan order di website atau lewat WhatsApp sesuai kebutuhan Anda."
+        description="Isi alamat pengiriman, pilih metode bayar, lalu lanjutkan order dengan cara yang paling nyaman untuk Anda."
       />
       <section className="pb-20">
         <div className="container">
@@ -69,6 +71,9 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
             status={searchParams?.status}
             message={searchParams?.message}
             isQrisEnabled={isQrisEnabled()}
+            initialShippingOptions={checkoutSettings.shippingMethods}
+            initialPaymentOptions={checkoutSettings.paymentMethods}
+            initialBankAccounts={checkoutSettings.bankAccounts}
             initialVouchers={serializableVouchers}
             initialCustomerProfile={
               customer

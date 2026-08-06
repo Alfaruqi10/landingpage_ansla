@@ -66,7 +66,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         />
       </div>
 
-      <section className="pb-20">
+      <section className="pb-20 sm:pt-8 lg:pt-10">
         <div className="container">
           <Reveal className="surface-panel p-5 sm:hidden">
             <p className="section-eyebrow">Koleksi</p>
@@ -213,7 +213,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     ? `Belum ada produk untuk koleksi ${selectedCollection.label}`
                     : "Belum ada produk pada koleksi ini"
                 }
-                description="Coba pilih koleksi lain atau hubungi tim kami untuk rekomendasi yang paling sesuai."
+                description="Coba pilih koleksi lain atau minta rekomendasi yang paling sesuai."
                 action={
                   <Button asChild>
                     <Link href="/products">Lihat Semua Koleksi</Link>

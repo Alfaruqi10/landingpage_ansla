@@ -1,4 +1,3 @@
-import { CartProvider } from "@/components/cart/cart-provider";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
@@ -23,11 +22,11 @@ export default async function MarketingLayout({
   const customerSession = await getCustomerSession();
 
   return (
-    <CartProvider>
+    <>
       <SiteHeader collectionItems={collectionItems} customerSession={customerSession} />
       <main className="pt-24 md:pt-28">{children}</main>
       <SiteFooter />
       <WhatsAppFloat />
-    </CartProvider>
+    </>
   );
 }

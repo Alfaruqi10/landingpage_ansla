@@ -3,22 +3,26 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
+  ChevronLeft,
+  ChevronRight,
   Expand,
   ShieldCheck,
   Truck,
   CheckCircle2,
-  ShoppingBag
+  ExternalLink,
+  MessageCircle
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, type SyntheticEvent, useEffect, useMemo, useState } from "react";
 
-import { useCart } from "@/components/cart/cart-provider";
-import { QuantityPicker } from "@/components/shared/quantity-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProductCollection } from "@/lib/collections";
+import { getProductGalleryUrls } from "@/lib/product-media";
+import { getProductVariantByColorAndSize, type ProductVariantCombination } from "@/lib/product-variation";
 import { buildWhatsAppLink, cn, formatCurrency } from "@/lib/utils";
+
+const SHOPEE_STORE_URL = "https://shopee.co.id/ansla.annisalabel";
 
 type ProductDetailExperienceProps = {
   product: {
@@ -27,6 +31,7 @@ type ProductDetailExperienceProps = {
     slug: string;
     shortDescription: string;
     imageUrl: string;
+    description: string;
     galleryImages?: unknown;
     variantOptions?: unknown;
     featured: boolean;
@@ -39,6 +44,7 @@ type ProductDetailExperienceProps = {
   };
   whatsappNumber: string;
   images?: string[];
+  children?: ReactNode;
 };
 
 type PointerPosition = {
@@ -47,11 +53,14 @@ type PointerPosition = {
 };
 
 type ProductVariant = {
+  id?: string;
   name: string;
   imageUrl?: string;
   galleryIndexes?: number[];
   sizes?: string[];
   stockBySize?: Record<string, number>;
+  priceBySize?: Record<string, number | null>;
+  combinations?: ProductVariantCombination[];
   totalStock?: number;
   isActive?: boolean;
   legacyGalleryIndex?: number;
@@ -69,17 +78,6 @@ function isBrowserImageSource(value: string) {
   return /^https?:\/\//i.test(value) || value.startsWith("/uploads/");
 }
 
-function normalizeGalleryImages(value: unknown) {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value.filter(
-    (item): item is string =>
-      typeof item === "string" && item.length > 0 && isBrowserImageSource(item)
-  );
-}
-
 function normalizeVariantOptions(value: unknown): ProductVariant[] {
   if (!Array.isArray(value)) {
     return [];
@@ -94,10 +92,13 @@ function normalizeVariantOptions(value: unknown): ProductVariant[] {
 
     const variant = item as {
       name?: unknown;
+      id?: unknown;
       imageUrl?: unknown;
       galleryIndexes?: unknown;
       sizes?: unknown;
       stockBySize?: unknown;
+      priceBySize?: unknown;
+      combinations?: unknown;
       totalStock?: unknown;
       isActive?: unknown;
       price?: unknown;
@@ -107,8 +108,68 @@ function normalizeVariantOptions(value: unknown): ProductVariant[] {
       return;
     }
 
+    const variantName = variant.name;
+    const combinations: ProductVariantCombination[] = Array.isArray(variant.combinations)
+      ? variant.combinations
+          .map<ProductVariantCombination | null>((combination) => {
+            if (!combination || typeof combination !== "object") {
+              return null;
+            }
+
+            const row = combination as {
+              id?: unknown;
+              colorId?: unknown;
+              colorName?: unknown;
+              size?: unknown;
+              stock?: unknown;
+              sku?: unknown;
+              price?: unknown;
+              isActive?: unknown;
+            };
+
+            if (
+              typeof row.id !== "string" ||
+              typeof row.colorId !== "string" ||
+              typeof row.size !== "string" ||
+              typeof row.stock !== "number" ||
+              !Number.isFinite(row.stock)
+            ) {
+              return null;
+            }
+
+            return {
+              id: row.id,
+              colorId: row.colorId,
+              colorName: typeof row.colorName === "string" ? row.colorName : variantName,
+              size: row.size,
+              stock: Math.max(0, Math.floor(row.stock)),
+              sku: typeof row.sku === "string" ? row.sku : "",
+              price:
+                typeof row.price === "number" && Number.isFinite(row.price) && row.price >= 0
+                  ? Math.floor(row.price)
+                  : null,
+              isActive: row.isActive !== false
+            };
+          })
+          .filter((combination): combination is ProductVariantCombination => Boolean(combination))
+      : [];
+    const stockBySizeFromCombinations = Object.fromEntries(
+      combinations
+        .filter((combination) => combination.isActive)
+        .map((combination) => [combination.size, combination.stock])
+    );
+    const priceBySizeFromCombinations = Object.fromEntries(
+      combinations
+        .filter(
+          (combination): combination is ProductVariantCombination & { price: number } =>
+            typeof combination.price === "number"
+        )
+        .map((combination) => [combination.size, combination.price])
+    );
+
     variants.push({
-      name: variant.name,
+      id: typeof variant.id === "string" ? variant.id : variantName,
+      name: variantName,
       imageUrl:
         typeof variant.imageUrl === "string" && isBrowserImageSource(variant.imageUrl)
           ? variant.imageUrl
@@ -122,6 +183,10 @@ function normalizeVariantOptions(value: unknown): ProductVariant[] {
         ? variant.sizes.filter(
             (item): item is string => typeof item === "string" && item.trim().length > 0
           )
+        : combinations.length > 0
+          ? combinations
+              .filter((combination) => combination.isActive)
+              .map((combination) => combination.size)
         : undefined,
       stockBySize:
         variant.stockBySize && typeof variant.stockBySize === "object"
@@ -137,7 +202,27 @@ function normalizeVariantOptions(value: unknown): ProductVariant[] {
                 )
                 .map(([size, stock]) => [size.trim(), Math.floor(stock as number)])
             )
+          : combinations.length > 0
+            ? stockBySizeFromCombinations
           : undefined,
+      priceBySize:
+        variant.priceBySize && typeof variant.priceBySize === "object"
+          ? Object.fromEntries(
+              Object.entries(variant.priceBySize as Record<string, unknown>)
+                .filter(
+                  ([size, price]) =>
+                    typeof size === "string" &&
+                    size.trim().length > 0 &&
+                    typeof price === "number" &&
+                    Number.isFinite(price) &&
+                    price >= 0
+                )
+                .map(([size, price]) => [size.trim(), Math.floor(price as number)])
+            )
+          : combinations.length > 0
+            ? priceBySizeFromCombinations
+            : undefined,
+      combinations,
       totalStock:
         typeof variant.totalStock === "number" &&
         Number.isFinite(variant.totalStock) &&
@@ -155,23 +240,38 @@ function normalizeVariantOptions(value: unknown): ProductVariant[] {
   return variants;
 }
 
+function uniqueImagesByPath(images: string[]) {
+  const seenImages = new Set<string>();
+
+  return images.filter((image) => {
+    const normalizedImage = image.trim().split("?")[0].toLowerCase();
+
+    if (!normalizedImage || seenImages.has(normalizedImage)) {
+      return false;
+    }
+
+    seenImages.add(normalizedImage);
+    return true;
+  });
+}
+
 export function ProductDetailExperience({
   product,
   whatsappNumber,
-  images
+  images,
+  children
 }: ProductDetailExperienceProps) {
   const zoomScale = 2.6;
-  const lensSizePercent = 100 / zoomScale;
-  const lensHalfPercent = lensSizePercent / 2;
-  const router = useRouter();
-  const { addItem, startBuyNow } = useCart();
   const variants = useMemo(
     () => normalizeVariantOptions(product.variantOptions).filter((variant) => variant.isActive !== false),
     [product.variantOptions]
   );
   const galleryFromProduct = useMemo(
-    () => normalizeGalleryImages(product.galleryImages),
-    [product.galleryImages]
+    () =>
+      getProductGalleryUrls(product.galleryImages, product.imageUrl, product.name).filter(
+        (item) => item.length > 0 && isBrowserImageSource(item)
+      ),
+    [product.galleryImages, product.imageUrl, product.name]
   );
   const galleryImages = useMemo(() => {
     const merged = [product.imageUrl, ...galleryFromProduct, ...(images || [])].filter(Boolean);
@@ -185,12 +285,21 @@ export function ProductDetailExperience({
   const [selectedSize, setSelectedSize] = useState(FALLBACK_SIZES[0]);
   const [brokenImages, setBrokenImages] = useState<string[]>([]);
   const [isHovering, setIsHovering] = useState(false);
+  const [isActiveImageLoaded, setIsActiveImageLoaded] = useState(false);
   const [pointer, setPointer] = useState<PointerPosition>({ x: 50, y: 50 });
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [quantity, setQuantity] = useState(1);
-  const [cartFeedback, setCartFeedback] = useState<"idle" | "added">("idle");
-  const lensLeftPercent = pointer.x - lensHalfPercent;
-  const lensTopPercent = pointer.y - lensHalfPercent;
+  const [imageAspectRatio, setImageAspectRatio] = useState(4 / 5);
+  const imageMaxWidth = Math.round(imageAspectRatio * 660);
+  const imageFrameStyle = {
+    aspectRatio: imageAspectRatio,
+    maxWidth: `${imageMaxWidth}px`
+  };
+  const lensWidthPercent = 100 / zoomScale;
+  const lensHeightPercent = 100 / zoomScale;
+  const lensHalfWidthPercent = lensWidthPercent / 2;
+  const lensHalfHeightPercent = lensHeightPercent / 2;
+  const lensLeftPercent = pointer.x - lensHalfWidthPercent;
+  const lensTopPercent = pointer.y - lensHalfHeightPercent;
   const selectedVariant =
     variants.find((variant) => variant.name === selectedVariantName) ?? variants[0] ?? null;
   const selectedVariantGallery = useMemo(() => {
@@ -207,16 +316,30 @@ export function ProductDetailExperience({
         ?.map((index) => galleryImages[index - 1])
         .filter((image): image is string => Boolean(image)) ?? [];
 
-    const merged = [
-      ...byIndexes,
-      ...(selectedVariant.imageUrl ? [selectedVariant.imageUrl] : [])
-    ];
+    const merged =
+      byIndexes.length > 0
+        ? [
+            ...(selectedVariant.imageUrl ? [selectedVariant.imageUrl] : []),
+            ...byIndexes
+          ]
+        : variants.length <= 1
+          ? [
+              ...(selectedVariant.imageUrl ? [selectedVariant.imageUrl] : []),
+              ...galleryImages
+            ]
+          : selectedVariant.imageUrl
+            ? [selectedVariant.imageUrl]
+            : galleryImages;
 
-    const uniqueImages = Array.from(new Set(merged.filter(Boolean)));
+    const uniqueImages = uniqueImagesByPath(merged.filter(Boolean));
 
     return uniqueImages.length > 0 ? uniqueImages : galleryImages;
-  }, [galleryImages, selectedVariant]);
-  const visibleGalleryImages = selectedVariantGallery.filter((image) => !brokenImages.includes(image));
+  }, [galleryImages, selectedVariant, variants.length]);
+  const visibleGalleryImages = useMemo(
+    () => selectedVariantGallery.filter((image) => !brokenImages.includes(image)),
+    [brokenImages, selectedVariantGallery]
+  );
+  const activeGalleryIndex = Math.max(0, visibleGalleryImages.indexOf(activeImage));
   const sizeOptions = useMemo<SizeOption[]>(() => {
     if (!selectedVariant) {
       return FALLBACK_SIZES.map((size) => ({
@@ -250,34 +373,31 @@ export function ProductDetailExperience({
     selectedSizeOption?.stock && selectedSizeOption.stock > 0 ? selectedSizeOption.stock : undefined;
   const isSelectedSizeOutOfStock = selectedSizeOption ? !selectedSizeOption.isAvailable : false;
   const isPurchaseDisabled = sizeOptions.length === 0 || isSelectedSizeOutOfStock;
-  const currentPrice = product.price;
+  const selectedCombination =
+    selectedVariant?.id && selectedVariant.combinations?.length
+      ? getProductVariantByColorAndSize(
+          selectedVariant.id,
+          selectedSize,
+          selectedVariant.combinations
+        )
+      : null;
+  const currentPrice = selectedCombination?.price ?? selectedVariant?.priceBySize?.[selectedSize] ?? product.price;
   const currentCompareAtPrice = product.compareAtPrice;
   const productCollection = getProductCollection(product);
-  const checkoutItem = {
-    productId: product.id,
-    productName: product.name,
-    productSlug: product.slug,
-    imageUrl: activeImage,
-    variantName: selectedVariant?.name,
-    size: selectedSize,
-    quantity,
-    unitPrice: currentPrice
-  };
   const whatsappLink = buildWhatsAppLink(
     whatsappNumber,
     [
-      "Assalamu'alaikum, saya tertarik dengan produk ANSLA ini dan ingin dibantu order.",
+      "Assalamu'alaikum, saya tertarik dengan produk ANSLA ini dan ingin tanya lebih lanjut.",
       `Produk: ${product.name}`,
       selectedVariant?.name ? `Varian: ${selectedVariant.name}` : null,
       selectedSize ? `Ukuran: ${selectedSize}` : null,
-      `Jumlah: ${quantity}`,
       `Harga: ${formatCurrency(currentPrice)}`,
-      `Subtotal: ${formatCurrency(currentPrice * quantity)}`,
       `Link produk: ${typeof window !== "undefined" ? window.location.href : ""}`
     ]
       .filter(Boolean)
       .join("\n")
   );
+  const shopeeProductUrl = SHOPEE_STORE_URL;
 
   function handlePointerMove(event: React.MouseEvent<HTMLDivElement>) {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -285,8 +405,8 @@ export function ProductDetailExperience({
     const y = ((event.clientY - bounds.top) / bounds.height) * 100;
 
     setPointer({
-      x: Math.min(100 - lensHalfPercent, Math.max(lensHalfPercent, x)),
-      y: Math.min(100 - lensHalfPercent, Math.max(lensHalfPercent, y))
+      x: Math.min(100 - lensHalfWidthPercent, Math.max(lensHalfWidthPercent, x)),
+      y: Math.min(100 - lensHalfHeightPercent, Math.max(lensHalfHeightPercent, y))
     });
   }
 
@@ -334,24 +454,40 @@ export function ProductDetailExperience({
     }
   }
 
-  function handleAddToCart() {
-    if (isPurchaseDisabled) {
+  function showGalleryImage(direction: "previous" | "next") {
+    if (visibleGalleryImages.length <= 1) {
       return;
     }
 
-    addItem(checkoutItem);
-    setCartFeedback("added");
-    window.setTimeout(() => setCartFeedback("idle"), 1800);
+    const currentIndex = activeGalleryIndex >= 0 ? activeGalleryIndex : 0;
+    const nextIndex =
+      direction === "next"
+        ? (currentIndex + 1) % visibleGalleryImages.length
+        : (currentIndex - 1 + visibleGalleryImages.length) % visibleGalleryImages.length;
+
+    setActiveImage(visibleGalleryImages[nextIndex]);
   }
 
-  function handleBuyNow() {
-    if (isPurchaseDisabled) {
+  function handleActiveImageLoad(event: SyntheticEvent<HTMLImageElement>) {
+    const { naturalWidth, naturalHeight } = event.currentTarget;
+
+    setIsActiveImageLoaded(true);
+
+    if (naturalWidth <= 0 || naturalHeight <= 0) {
       return;
     }
 
-    startBuyNow(checkoutItem);
-    router.push("/checkout?mode=buy-now");
+    const nextRatio = naturalWidth / naturalHeight;
+    const clampedRatio = Math.min(1.2, Math.max(0.55, nextRatio));
+
+    setImageAspectRatio(clampedRatio);
   }
+
+  useEffect(() => {
+    if (visibleGalleryImages.length > 0 && !visibleGalleryImages.includes(activeImage)) {
+      setActiveImage(visibleGalleryImages[0]);
+    }
+  }, [activeImage, visibleGalleryImages]);
 
   useEffect(() => {
     if (sizeOptions.length === 0) {
@@ -373,17 +509,16 @@ export function ProductDetailExperience({
   }, [selectedSize, selectedSizeOption, sizeOptions]);
 
   useEffect(() => {
-    if (maxSelectableQuantity && quantity > maxSelectableQuantity) {
-      setQuantity(maxSelectableQuantity);
-    }
-  }, [maxSelectableQuantity, quantity]);
+    setIsActiveImageLoaded(false);
+  }, [activeImage]);
 
   return (
     <>
-      <div className="mx-auto grid max-w-[1320px] items-start gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="mx-auto grid max-w-[1160px] items-start gap-6 lg:grid-cols-2 xl:gap-8">
         <div className="overflow-hidden">
           <div
-            className="relative overflow-hidden rounded-[1.4rem] bg-stone-100"
+            className="relative mx-auto w-full overflow-hidden rounded-[1.4rem] bg-stone-100"
+            style={imageFrameStyle}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             onMouseMove={handlePointerMove}
@@ -391,10 +526,16 @@ export function ProductDetailExperience({
             <img
               src={activeImage}
               alt={product.name}
-              className="aspect-[4/5] h-full w-full cursor-zoom-in object-cover"
+              className="h-full w-full cursor-zoom-in object-cover"
+              loading="lazy"
+              decoding="async"
               onClick={() => setIsFullscreen(true)}
+              onLoad={handleActiveImageLoad}
               onError={() => handleImageError(activeImage)}
             />
+            {!isActiveImageLoaded ? (
+              <div className="pointer-events-none absolute inset-0 animate-pulse bg-stone-200/70" />
+            ) : null}
 
             <button
               type="button"
@@ -413,38 +554,98 @@ export function ProductDetailExperience({
               style={{
                 left: `${pointer.x}%`,
                 top: `${pointer.y}%`,
-                width: `${lensSizePercent}%`,
-                height: `${lensSizePercent}%`
+                width: `${lensWidthPercent}%`,
+                height: `${lensHeightPercent}%`
               }}
             />
           </div>
+
+          {visibleGalleryImages.length > 1 ? (
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => showGalleryImage("previous")}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/80 bg-[hsl(var(--card)/0.9)] text-foreground shadow-soft transition hover:border-stone-400 hover:bg-[hsl(var(--accent)/0.8)]"
+                aria-label="Foto sebelumnya"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <div className="flex min-w-0 flex-1 gap-3 overflow-x-auto pb-1">
+                {visibleGalleryImages.map((image, index) => (
+                  <button
+                    key={`${image}-${index}`}
+                    type="button"
+                    onClick={() => setActiveImage(image)}
+                    className={cn(
+                      "relative h-20 w-16 shrink-0 overflow-hidden rounded-[1rem] border bg-stone-100 transition",
+                      activeImage === image
+                        ? "border-stone-900 shadow-soft dark:border-stone-100"
+                        : "border-border/80 hover:border-stone-400"
+                    )}
+                    aria-label={`Lihat foto produk ${index + 1}`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.name} foto ${index + 1}`}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onError={() => handleImageError(image)}
+                    />
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => showGalleryImage("next")}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/80 bg-[hsl(var(--card)/0.9)] text-foreground shadow-soft transition hover:border-stone-400 hover:bg-[hsl(var(--accent)/0.8)]"
+                aria-label="Foto berikutnya"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          ) : null}
+
+          <div className="surface-panel mt-6 rounded-[1.5rem] border border-border/80 bg-[hsl(var(--secondary)/0.45)] p-5 sm:p-8">
+            <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
+              Deskripsi Produk
+            </p>
+            <p className="mt-4">{product.description}</p>
+          </div>
         </div>
 
-        <div className="hidden xl:block">
-          {isHovering ? (
-            <div className="overflow-hidden border border-border/70 bg-stone-100 p-3">
-              <div className="relative aspect-[4/5] overflow-hidden bg-stone-100">
-                <div
-                  className="absolute"
-                  style={{
-                    width: `${zoomScale * 100}%`,
-                    height: `${zoomScale * 100}%`,
-                    left: `-${lensLeftPercent * zoomScale}%`,
-                    top: `-${lensTopPercent * zoomScale}%`
-                  }}
-                >
-                  <img
-                    src={activeImage}
-                    alt={`${product.name} zoom preview`}
-                    className="h-full w-full object-cover"
-                    onError={() => handleImageError(activeImage)}
-                  />
-                </div>
+        <div className="relative hidden lg:block">
+          <div
+            className={cn(
+              "pointer-events-none absolute -left-3 top-0 z-20 w-full overflow-hidden rounded-[1.4rem] bg-stone-100 shadow-soft transition-opacity duration-150",
+              isHovering ? "opacity-100" : "opacity-0"
+            )}
+            style={imageFrameStyle}
+            aria-hidden={!isHovering}
+          >
+            <div className="relative h-full w-full overflow-hidden bg-stone-100">
+              <div
+                className="absolute"
+                style={{
+                  width: `${zoomScale * 100}%`,
+                  height: `${zoomScale * 100}%`,
+                  left: `-${lensLeftPercent * zoomScale}%`,
+                  top: `-${lensTopPercent * zoomScale}%`
+                }}
+              >
+                <img
+                  src={activeImage}
+                  alt={`${product.name} zoom preview`}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => handleImageError(activeImage)}
+                />
               </div>
             </div>
-          ) : (
-            <div className="xl:sticky xl:top-28 xl:pl-6">
-              <div className="max-w-[440px]">
+          </div>
+          <div className="h-full">
+            <div className="flex h-full flex-col">
               <div className="flex flex-wrap items-center gap-3">
                 <Badge className="rounded-full bg-stone-900 text-white">
                   {product.featured ? "Produk unggulan" : "Koleksi premium"}
@@ -469,7 +670,7 @@ export function ProductDetailExperience({
               </div>
               <p className="mt-5">{product.shortDescription}</p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="mt-6 grid gap-3 xl:grid-cols-3">
                 <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Buyer note
@@ -480,13 +681,13 @@ export function ProductDetailExperience({
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Jika ragu size
                   </p>
-                  <p className="mt-2 text-sm">Tanya size dan warna lewat WhatsApp sebelum checkout juga bisa.</p>
+                  <p className="mt-2 text-sm">Tanya size dan warna lewat WhatsApp sebelum order.</p>
                 </div>
                 <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Alur order
+                    Cara order
                   </p>
-                  <p className="mt-2 text-sm">Bisa langsung checkout web atau minta dibantu order manual.</p>
+                  <p className="mt-2 text-sm">Order aman via Shopee atau konsultasi dulu lewat WhatsApp.</p>
                 </div>
               </div>
 
@@ -549,25 +750,7 @@ export function ProductDetailExperience({
                 </div>
                 {isSelectedSizeOutOfStock ? (
                   <p className="mt-2 text-sm text-rose-500">
-                    Ukuran ini sedang habis dan tidak bisa dipilih untuk checkout.
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="mt-6">
-                <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                  Jumlah
-                </p>
-                <div className="mt-3">
-                  <QuantityPicker
-                    value={quantity}
-                    onChange={setQuantity}
-                    max={maxSelectableQuantity}
-                  />
-                </div>
-                {maxSelectableQuantity ? (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Stok tersedia untuk ukuran ini: {maxSelectableQuantity}
+                    Ukuran ini sedang habis, pilih ukuran lain atau tanya via WhatsApp.
                   </p>
                 ) : null}
               </div>
@@ -589,43 +772,35 @@ export function ProductDetailExperience({
 
               <div className="mt-7 grid gap-3">
                 <Button
-                  type="button"
+                  asChild
                   size="lg"
                   className="h-12 w-full px-7"
-                  onClick={handleBuyNow}
-                  disabled={isPurchaseDisabled}
                 >
-                  Checkout Sekarang
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="h-12 w-full px-7"
-                  onClick={handleAddToCart}
-                  disabled={isPurchaseDisabled}
-                >
-                  <ShoppingBag className="mr-2 h-4 w-4" />
-                  {cartFeedback === "added" ? "Masuk ke Keranjang" : "Tambah ke Keranjang"}
+                  <Link href={shopeeProductUrl} target="_blank">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Beli via Shopee
+                  </Link>
                 </Button>
                 <Button
                   asChild
                   variant="outline"
                   size="lg"
-                  className="h-12 w-full border-emerald-500/50 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
+                  className="h-12 w-full border-emerald-500/50 px-7 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
                 >
                   <Link href={whatsappLink} target="_blank">
-                    Tanya Size via WhatsApp
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Tanya via WhatsApp
                   </Link>
                 </Button>
               </div>
-              </div>
+
+              {children ? <div className="mt-6">{children}</div> : null}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      <div className="mt-5 xl:hidden sm:mt-6">
+      <div className="mt-5 lg:hidden sm:mt-6">
         <div className="surface-panel p-5 sm:p-8">
           <div className="flex flex-wrap items-center gap-3">
             <Badge className="rounded-full bg-stone-900 text-white">
@@ -661,13 +836,13 @@ export function ProductDetailExperience({
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Jika ragu size
               </p>
-              <p className="mt-2 text-sm">Kami bisa bantu pilih size dan warna sebelum Anda bayar.</p>
+              <p className="mt-2 text-sm">Tanya size dan warna lewat WhatsApp sebelum order.</p>
             </div>
             <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card)/0.72)] px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Cara order
               </p>
-              <p className="mt-2 text-sm">Lanjut checkout web atau tanya dulu lewat WhatsApp, dua-duanya aman.</p>
+              <p className="mt-2 text-sm">Order aman via Shopee atau konsultasi dulu lewat WhatsApp.</p>
             </div>
           </div>
           {variants.length > 0 ? (
@@ -728,47 +903,20 @@ export function ProductDetailExperience({
             </div>
             {isSelectedSizeOutOfStock ? (
               <p className="mt-2 text-sm text-rose-500">
-                Ukuran ini sedang habis dan tidak bisa dipilih untuk checkout.
-              </p>
-            ) : null}
-          </div>
-          <div className="mt-5 sm:mt-6">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
-              Jumlah
-            </p>
-            <div className="mt-3">
-              <QuantityPicker
-                value={quantity}
-                onChange={setQuantity}
-                max={maxSelectableQuantity}
-              />
-            </div>
-            {maxSelectableQuantity ? (
-              <p className="mt-2 text-sm text-muted-foreground">
-                Stok tersedia untuk ukuran ini: {maxSelectableQuantity}
+                Ukuran ini sedang habis, pilih ukuran lain atau tanya via WhatsApp.
               </p>
             ) : null}
           </div>
           <div className="mt-6 grid gap-3 sm:mt-7">
             <Button
-              type="button"
+              asChild
               size="lg"
               className="h-11 w-full px-6 sm:h-12 sm:px-7"
-              onClick={handleBuyNow}
-              disabled={isPurchaseDisabled}
             >
-              Checkout Sekarang
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="h-11 w-full px-6 sm:h-12 sm:px-7"
-              onClick={handleAddToCart}
-              disabled={isPurchaseDisabled}
-            >
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              {cartFeedback === "added" ? "Masuk ke Keranjang" : "Tambah ke Keranjang"}
+              <Link href={shopeeProductUrl} target="_blank">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Beli via Shopee
+              </Link>
             </Button>
             <Button
               asChild
@@ -777,10 +925,13 @@ export function ProductDetailExperience({
               className="h-11 w-full border-emerald-500/50 px-6 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40 sm:h-12 sm:px-7"
             >
               <Link href={whatsappLink} target="_blank">
-                Tanya Size via WhatsApp
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Tanya via WhatsApp
               </Link>
             </Button>
           </div>
+
+          {children ? <div className="mt-6">{children}</div> : null}
         </div>
       </div>
 
@@ -796,6 +947,8 @@ export function ProductDetailExperience({
               src={activeImage}
               alt={product.name}
               className="max-h-[92vh] w-full object-contain"
+              loading="lazy"
+              decoding="async"
               onError={() => handleImageError(activeImage)}
             />
             <button

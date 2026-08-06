@@ -44,7 +44,7 @@ export function ContactForm({ redirectTo }: { redirectTo: string }) {
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-muted-foreground">
-          Isi minimal nama, email, dan pesan agar tim kami bisa menindaklanjuti dengan tepat.
+          Isi minimal nama, email, dan pesan supaya kebutuhan Anda bisa dipahami dengan jelas.
         </p>
         <Button type="submit" className="w-full sm:min-w-[160px] sm:w-auto">
           Kirim Pesan

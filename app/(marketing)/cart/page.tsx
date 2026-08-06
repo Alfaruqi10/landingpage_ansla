@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Keranjang",
-  description: "Review produk yang dipilih sebelum lanjut checkout via website atau WhatsApp."
+  description: "Periksa produk pilihan Anda sebelum lanjut checkout atau order lewat WhatsApp."
 };
 
 export default function CartPage() {

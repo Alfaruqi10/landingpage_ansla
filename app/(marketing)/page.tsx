@@ -2,17 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowUpRight,
   ArrowRight,
   BadgeCheck,
-  CalendarRange,
   Check,
-  ChevronRight,
-  Crown,
-  HeartHandshake,
   MoveRight,
-  PackageCheck,
-  PlayCircle,
   ShieldCheck,
   Sparkles,
   Star
@@ -24,8 +17,6 @@ import { Reveal } from "@/components/shared/reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { StatusBanner } from "@/components/shared/status-banner";
 import { TestimonialCard } from "@/components/shared/testimonial-card";
-import { VideoPlaceholder } from "@/components/shared/video-placeholder";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getHomePageData } from "@/lib/data/public";
@@ -35,7 +26,7 @@ import { buildWhatsAppLink } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Abaya dan Modestwear Premium",
   description:
-    "Temukan abaya dan modestwear premium yang nyaman dipakai, mudah dipilih, dan siap dipesan lewat checkout web atau WhatsApp.",
+    "Temukan abaya dan modestwear premium yang nyaman dipakai, mudah dipilih, dan siap dipesan lewat Shopee atau WhatsApp.",
   openGraph: {
     title: "ANSLA | Abaya dan Modestwear Premium",
     description:
@@ -78,67 +69,104 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80"
     };
   });
-  const heroCollectionPreview = collectionCards.slice(0, 3);
-  const spotlightProducts = featuredProducts.slice(0, 3);
   const avatarTestimonials = testimonials.filter((testimonial) => testimonial.imageUrl).slice(0, 4);
+  const heroProduct = featuredProducts[0];
+  const heroImageUrl =
+    heroBanner?.imageUrl ||
+    heroProduct?.imageUrl ||
+    "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1400&q=80";
+  const rawHeroSlideImages = Array.from(
+    new Set(banners.map((banner) => banner.imageUrl).filter((imageUrl): imageUrl is string => Boolean(imageUrl)))
+  ).slice(0, 4);
+  const heroSlideImages =
+    rawHeroSlideImages.length > 1
+      ? Array.from({ length: 4 }, (_, index) => rawHeroSlideImages[index % rawHeroSlideImages.length])
+      : rawHeroSlideImages.length === 1
+        ? rawHeroSlideImages
+        : [heroImageUrl];
+  const heroTitle = heroBanner?.title || "Elegansi Modest Wear untuk Gaya Premium Anda.";
+  const heroSubtitle =
+    heroBanner?.subtitle ||
+    "Temukan koleksi yang bahannya nyaman, jatuhnya rapi, dan mudah dipilih untuk banyak momen.";
+  const heroCtaText = heroBanner?.ctaText || "Lihat Koleksi";
+  const heroCtaLink = heroBanner?.ctaLink || "/products";
+  const heroStats = [
+    {
+      label: "Rating",
+      value: siteConfig.socialProof.rating,
+      note: "Dari pelanggan setia"
+    },
+    {
+      label: "Ulasan",
+      value: siteConfig.socialProof.reviews,
+      note: "Review positif"
+    },
+    {
+      label: "Pelanggan",
+      value: siteConfig.socialProof.customers,
+      note: "Telah percaya ANSLA"
+    }
+  ];
 
   return (
     <>
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 -z-10 h-[620px] bg-[radial-gradient(circle_at_top,_rgba(186,160,123,0.28),_transparent_48%)]" />
-        <div className="absolute right-[-8rem] top-24 -z-10 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(212,191,161,0.24),_transparent_66%)] blur-3xl" />
-        <div className="container section-space">
-          <div className="grid gap-10 lg:grid-cols-[0.96fr_1.04fr] lg:items-center">
-            <Reveal className="space-y-7">
-              <div className="flex flex-wrap items-center gap-3">
-                <Badge className="bg-white/92 px-4 py-2 text-stone-700 shadow-[0_10px_24px_rgba(59,42,28,0.08)]">
+      <section className="relative -mt-24 overflow-hidden text-stone-900 dark:text-white md:-mt-28">
+        <div className="absolute inset-x-0 top-0 h-[620px] bg-[radial-gradient(circle_at_top,_rgba(186,160,123,0.28),_transparent_48%)] dark:bg-[radial-gradient(circle_at_top,_rgba(190,160,113,0.1),_transparent_42%)]" />
+        <div className="absolute right-[-8rem] top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(212,191,161,0.24),_transparent_66%)] blur-3xl dark:bg-[radial-gradient(circle,_rgba(212,191,161,0.08),_transparent_66%)]" />
+        <div className="container relative pb-12 pt-48 sm:pb-14 sm:pt-52 lg:pb-16 lg:pt-52">
+          <div className="grid gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:items-center">
+            <Reveal className="space-y-5 text-center sm:text-left">
+              <div className="flex flex-col items-center gap-4 sm:flex-row">
+                <div className="rounded-full border border-stone-200/80 bg-white/92 px-4 py-2 text-xs font-semibold text-stone-700 shadow-[0_10px_24px_rgba(59,42,28,0.08)] dark:border-white/14 dark:bg-white/8 dark:text-white/88 dark:shadow-[0_14px_34px_rgba(0,0,0,0.16)]">
                   Untuk Anda yang ingin tampil anggun tanpa ribet
-                </Badge>
-                <div className="inline-flex items-center gap-2 rounded-full border border-stone-200/80 bg-white/80 px-4 py-2 text-sm text-stone-600 shadow-[0_10px_24px_rgba(59,42,28,0.06)]">
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-stone-200/80 bg-white/80 px-4 py-2 text-sm text-stone-600 shadow-[0_10px_24px_rgba(59,42,28,0.06)] dark:border-white/12 dark:bg-white/8 dark:text-white/82 dark:shadow-[0_14px_34px_rgba(0,0,0,0.16)]">
                   <Star className="h-4 w-4 fill-current text-amber-500" />
-                  {siteConfig.socialProof.rating} dari pelanggan kami
+                  {siteConfig.socialProof.rating} Rating - {siteConfig.socialProof.reviews} Reviews
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
                 <div className="flex -space-x-3">
                   {avatarTestimonials.map((testimonial, index) => (
                     <div
                       key={testimonial.id}
-                      className="relative h-11 w-11 overflow-hidden rounded-full border-2 border-[hsl(var(--background))] bg-stone-200 shadow-md"
+                      className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-[hsl(var(--background))] bg-stone-200 shadow-md"
                     >
                       <Image
                         src={testimonial.imageUrl!}
                         alt={testimonial.name}
                         fill
-                        sizes="44px"
+                        sizes="40px"
                         className="object-cover"
                         priority={index < 2}
                       />
                     </div>
                   ))}
                 </div>
-                <p className="max-w-xs text-sm leading-6 text-stone-600">
+                <p className="max-w-xs text-sm leading-6 text-stone-700 dark:text-white/68">
                   Dipilih ribuan pelanggan yang mencari modestwear rapi, nyaman, dan mudah diorder.
                 </p>
               </div>
 
-              <div className="space-y-5">
-                <p className="section-eyebrow">Koleksi pilihan untuk dipakai di momen nyata</p>
-                <h1 className="max-w-[11ch] text-balance text-5xl leading-[0.98] sm:max-w-3xl md:text-7xl">
+              <div className="mx-auto max-w-[720px] space-y-5 sm:mx-0">
+                <p className="section-eyebrow">
+                  Koleksi pilihan untuk dipakai di momen nyata
+                </p>
+                <h1 className="text-balance text-[2.65rem] leading-[0.98] text-stone-900 dark:text-white sm:text-6xl lg:text-[4.35rem]">
                   Cari model yang bahannya enak, jatuhnya rapi, dan tetap aman dipakai di banyak momen.
                 </h1>
-                <p className="max-w-xl text-base text-stone-600 sm:max-w-2xl md:text-xl">
-                  Kami rapikan pilihan koleksi, foto, dan alur order supaya Anda lebih cepat yakin:
-                  lihat modelnya, cek detail pentingnya, lalu checkout atau tanya ukuran tanpa ribet.
+                <p className="mx-auto max-w-xl text-base leading-7 text-stone-700 dark:text-white/70 sm:mx-0 md:text-lg">
+                  Lihat modelnya, cek detail pentingnya, lalu order via Shopee
+                  atau tanya ukuran lewat WhatsApp — tanpa ribet.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="grid gap-3 sm:flex sm:flex-wrap">
                 <Button
                   asChild
                   size="lg"
-                  className="h-12 px-7 shadow-[0_16px_30px_rgba(36,26,18,0.18)]"
+                  className="h-12 rounded-full px-8 shadow-[0_16px_30px_rgba(36,26,18,0.18)]"
                 >
                   <Link href="/products">
                     Lihat Koleksi
@@ -149,7 +177,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="h-12 border-stone-300/90 bg-white/85 px-7 shadow-[0_12px_28px_rgba(52,37,23,0.08)]"
+                  className="h-12 rounded-full border-stone-300/90 bg-white/85 px-8 text-stone-900 shadow-[0_12px_28px_rgba(52,37,23,0.08)] hover:bg-white/95 dark:border-white/18 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
                 >
                   <Link
                     href={buildWhatsAppLink(
@@ -163,162 +191,87 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </Button>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="insight-card p-4 sm:p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-500">
-                    Rating
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold text-stone-900">
-                    {siteConfig.socialProof.rating}
-                  </p>
-                  <p className="mt-1 text-sm">Kepuasan pelanggan yang kembali order.</p>
-                </div>
-                <div className="insight-card p-4 sm:p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-500">
-                    Review
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold text-stone-900">
-                    {siteConfig.socialProof.reviews}
-                  </p>
-                  <p className="mt-1 text-sm">Testimoni dan social proof dari pelanggan.</p>
-                </div>
-                <div className="insight-card p-4 sm:p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-500">
-                    Pelanggan
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold text-stone-900">
-                    {siteConfig.socialProof.customers}
-                  </p>
-                  <p className="mt-1 text-sm">Pelanggan dari berbagai kota di Indonesia.</p>
-                </div>
+              <div className="grid grid-cols-3 gap-3">
+                {heroStats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="insight-card p-3 text-center sm:p-4 sm:text-left"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500 sm:text-xs">
+                      {stat.label}
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-stone-900 dark:text-white sm:text-3xl">{stat.value}</p>
+                    <p className="mt-1 hidden text-xs leading-5 sm:block">{stat.note}</p>
+                  </div>
+                ))}
               </div>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <div className="relative min-h-[560px]">
-                <div className="absolute left-[10%] top-[8%] -z-10 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(196,166,132,0.24),_transparent_64%)] blur-3xl" />
+              <div className="relative mx-auto max-w-[500px]">
+                <div className="relative rounded-[2rem] border border-stone-200/80 bg-white/84 p-3 shadow-[0_22px_70px_rgba(74,53,33,0.08),0_6px_20px_rgba(45,32,20,0.06)] backdrop-blur dark:border-white/14 dark:bg-white/[0.055] dark:shadow-[0_34px_90px_rgba(0,0,0,0.36)]">
+                  <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[1.55rem] bg-[#dedbd0]">
+                    {heroSlideImages.map((imageUrl, index) => {
+                      const shouldAnimate = heroSlideImages.length > 1;
 
-                <div className="insight-card absolute left-0 top-6 z-20 hidden w-56 -rotate-[7deg] p-5 lg:block">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-stone-500">Best seller</p>
-                    <Crown className="h-4 w-4 text-stone-500" />
+                      return (
+                        <Image
+                          key={`${imageUrl}-${index}`}
+                          src={imageUrl}
+                          alt={index === 0 ? heroTitle : `Koleksi ANSLA ${index + 1}`}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 45vw"
+                          className={
+                            shouldAnimate
+                              ? "hero-photo-slide absolute inset-0 object-cover object-center"
+                              : "absolute inset-0 object-cover object-center"
+                          }
+                          style={
+                            shouldAnimate
+                              ? {
+                                  animationDelay: `${index * 4}s`,
+                                  animationDuration: "16s"
+                                }
+                              : undefined
+                          }
+                          priority={index === 0}
+                        />
+                      );
+                    })}
+                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/14 via-transparent to-white/10 dark:from-stone-950/38 dark:to-transparent" />
                   </div>
-                  <p className="mt-3 text-4xl font-semibold text-stone-900">
-                    {featuredProducts.length}
-                  </p>
-                  <p className="mt-2 text-sm">
-                    Koleksi unggulan yang paling cepat mengarahkan pelanggan ke detail produk.
-                  </p>
-                  <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-stone-900 px-3 py-1.5 text-xs text-white">
-                    Lihat favorit
-                    <ArrowUpRight className="h-3.5 w-3.5" />
+
+                  <div className="absolute -bottom-5 left-7 z-20 rounded-[0.55rem] border border-stone-200/90 bg-white px-6 py-5 text-stone-900 shadow-[0_18px_44px_rgba(90,59,24,0.14)] dark:border-white/12 dark:bg-[#211915] dark:text-white">
+                    <p className="font-display text-3xl leading-none">Hand-picked</p>
+                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-stone-500 dark:text-[#e6c77a]">
+                      Premium materials
+                    </p>
                   </div>
                 </div>
 
-                <div className="surface-panel relative ml-auto overflow-hidden p-3 sm:p-5 lg:w-[82%]">
-                  <div className="relative min-h-[380px] overflow-hidden rounded-[1.35rem] bg-stone-200 sm:min-h-[560px] sm:rounded-[1.6rem]">
-                    <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2 sm:left-6 sm:top-6">
-                      <div className="rounded-full border border-white/20 bg-white/12 px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-white/90 backdrop-blur sm:px-4 sm:py-2 sm:text-xs">
-                        Siap dipilih tanpa banyak bingung
-                      </div>
-                      <div className="hidden rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-xs text-white/85 backdrop-blur sm:inline-flex">
-                        Checkout web atau konsultasi WhatsApp
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 z-20 max-w-[320px] rounded-[1.35rem] border border-white/18 bg-black/28 p-4 text-white backdrop-blur sm:bottom-6 sm:left-6 sm:p-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/65">
+                <div className="mt-10 rounded-[1.5rem] border border-stone-200/80 bg-white/72 p-5 text-stone-900 shadow-[0_12px_34px_rgba(59,42,28,0.08)] backdrop-blur dark:border-white/12 dark:bg-white/[0.045] dark:text-white/82">
+                  <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.26em] text-stone-500 dark:text-[#f0d183]/76">
                         Curated highlight
                       </p>
-                      <h2 className="mt-3 text-3xl leading-[1.02] text-white">
-                        {heroBanner?.title || "Curated essentials for refined modest dressing"}
+                      <h2 className="mt-3 text-2xl leading-[1.08] text-stone-950 dark:text-white sm:text-3xl">
+                        {heroTitle}
                       </h2>
-                      <p className="mt-3 text-sm leading-6 text-white/78">
-                        {heroBanner?.subtitle ||
-                          "Lihat koleksi yang terasa rapi, nyaman, dan siap dipakai dari aktivitas harian sampai acara spesial."}
+                      <p className="mt-3 max-w-xl text-sm leading-6 text-stone-600 dark:text-white/70">
+                        {heroSubtitle}
                       </p>
-                    <Button asChild variant="secondary" className="mt-4 bg-white text-stone-900">
-                      <Link href={heroBanner?.ctaLink || "/products"}>
-                        {heroBanner?.ctaText || "Lihat Koleksi"}
-                      </Link>
+                    </div>
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="rounded-full"
+                    >
+                      <Link href={heroCtaLink}>{heroCtaText}</Link>
                     </Button>
                   </div>
-
-                    <Image
-                      src={
-                        heroBanner?.imageUrl ||
-                        "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1400&q=80"
-                      }
-                      alt={heroBanner?.title || "Premium ANSLA collection"}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 45vw"
-                      className="absolute inset-0 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/76 via-stone-900/14 to-transparent" />
-                  </div>
                 </div>
 
-                <div className="insight-card absolute bottom-0 left-6 z-20 hidden w-72 rotate-[-4deg] p-5 lg:block">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-stone-500">Paling sering dicari</p>
-                    <CalendarRange className="h-4 w-4 text-stone-500" />
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    {spotlightProducts.map((product) => (
-                      <div
-                        key={product.id}
-                        className="flex items-center justify-between gap-3 rounded-[1rem] border border-stone-200/70 bg-white/70 px-3 py-2"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-stone-900">
-                            {product.name}
-                          </p>
-                          <p className="text-xs text-stone-500">{product.category.name}</p>
-                        </div>
-                        <ChevronRight className="h-4 w-4 shrink-0 text-stone-500" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="insight-card absolute bottom-10 right-0 z-20 hidden w-56 rotate-[4deg] p-5 lg:block">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-stone-500">Kategori populer</p>
-                    <PackageCheck className="h-4 w-4 text-stone-500" />
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {heroCollectionPreview.map((collection) => (
-                      <span
-                        key={collection.slug}
-                        className="rounded-full border border-stone-200 bg-white/78 px-3 py-1.5 text-xs font-medium text-stone-700"
-                      >
-                        {collection.label}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm">
-                    Jalur cepat untuk menemukan jenis koleksi yang paling sesuai kebutuhan Anda.
-                  </p>
-                </div>
-
-                <div className="mt-5 grid gap-3 lg:hidden">
-                  <div className="insight-card p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-stone-500">Kategori populer</p>
-                      <HeartHandshake className="h-4 w-4 text-stone-500" />
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {heroCollectionPreview.map((collection) => (
-                        <span
-                          key={collection.slug}
-                          className="rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-stone-700"
-                        >
-                          {collection.label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
               </div>
             </Reveal>
           </div>
@@ -363,10 +316,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </div>
               <div className="surface-panel p-5 sm:p-6">
                 <p className="section-eyebrow">Langkah 3</p>
-                <h2 className="mt-3 text-2xl">Lanjut checkout atau tanya size lewat WhatsApp</h2>
+                <h2 className="mt-3 text-2xl">Order via Shopee atau konsultasi lewat WhatsApp</h2>
                 <p className="mt-3 text-stone-600">
-                  Kalau sudah cocok langsung order, kalau masih ragu tinggal minta bantuan warna,
-                  size, atau rekomendasi model yang paling pas.
+                  Kalau sudah cocok, langsung order aman via Shopee. Masih ragu soal ukuran
+                  atau warna? Tinggal tanya lewat WhatsApp, kami bantu pilihkan.
                 </p>
               </div>
             </div>
@@ -380,11 +333,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <SectionHeading
               eyebrow="Produk unggulan"
               title="Pilihan yang paling sering bikin pembeli cepat yakin"
-              description="Koleksi ini paling sering dipilih karena warnanya aman, siluetnya mudah dipakai, dan detailnya cukup jelas untuk lanjut order lebih cepat."
+              description="Koleksi ini paling sering dipilih karena warnanya aman, siluetnya mudah dipakai, dan detailnya cukup jelas untuk langsung order via Shopee."
               action={
                 <Button asChild variant="outline">
-                  <Link href="/products">
-                    Lihat Semua Koleksi
+                  <Link href="https://shopee.co.id/ansla.annisalabel" target="_blank">
+                    Beli di Shopee
                     <MoveRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -451,8 +404,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 Bukan cuma cantik dilihat, tapi juga enak dipakai dan mudah dipilih.
               </h2>
               <p className="max-w-xl">
-                Kami merapikan setiap bagian halaman agar Anda lebih mudah memahami model,
-                warna, dan cara order tanpa harus bertanya dari nol.
+                Pilihan model, warna, dan detail order tersaji jelas supaya Anda bisa
+                memilih dengan lebih tenang sebelum checkout.
               </p>
             </Reveal>
             <div className="grid gap-4 md:grid-cols-3">
@@ -466,7 +419,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                         ) : index === 1 ? (
                           <ShieldCheck className="h-5 w-5" />
                         ) : (
-                          <PlayCircle className="h-5 w-5" />
+                          <Check className="h-5 w-5" />
                         )}
                       </div>
                       <h3 className="text-2xl">{item.title}</h3>
@@ -509,7 +462,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     </div>
                     <p className="mt-3 text-5xl">4.9</p>
                     <p className="mt-2 text-white/70">
-                      Banyak pelanggan menyukai koleksi kami karena jatuh bahannya rapi, warnanya
+                      Banyak pelanggan menyukai koleksi ANSLA karena jatuh bahannya rapi, warnanya
                       aman dipakai, dan tetap nyaman dipakai seharian.
                     </p>
                   </div>
@@ -541,23 +494,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
       </section>
 
-      <section className="section-space">
-        <div className="container">
-          <Reveal>
-            <SectionHeading
-              eyebrow="Lihat produk lebih dekat"
-              title="Area video bisa dipakai untuk bantu Anda melihat jatuh bahan dan detail model"
-              description="Bagian ini disiapkan untuk video produk, try-on, atau penjelasan singkat supaya Anda lebih yakin sebelum order."
-            />
-          </Reveal>
-          <div className="mt-10">
-            <Reveal delay={0.08}>
-              <VideoPlaceholder />
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
       <section className="section-space bg-white/60">
         <div className="container">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr]">
@@ -565,7 +501,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <SectionHeading
                 eyebrow="Pertanyaan yang sering ditanyakan"
                 title="Jawaban singkat untuk hal yang biasanya bikin calon pembeli menahan checkout"
-                description="Kami rangkum pertanyaan paling umum soal bahan, ukuran, dan pemesanan supaya Anda tidak perlu mulai bertanya dari nol."
+                description="Temukan jawaban cepat soal bahan, ukuran, dan pemesanan sebelum Anda lanjut bertanya atau checkout."
               />
               <div className="mt-8 space-y-4">
                 {faqs.map((faq, index) => (
@@ -600,7 +536,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     source="hero-form"
                     redirectTo="/"
                     title="Tinggalkan kontak Anda"
-                    description="Tim kami akan menghubungi Anda dengan rekomendasi koleksi yang lebih sesuai."
+                    description="Dapatkan rekomendasi koleksi yang lebih sesuai dengan kebutuhan Anda."
                     compact={false}
                   />
                 </div>
@@ -621,13 +557,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     Kalau Anda mencari koleksi yang rapi, nyaman, dan mudah dipakai, mulai dari sini.
                   </h2>
                   <p className="mt-3 max-w-2xl text-white/70">
-                    Jelajahi koleksi unggulan kami atau langsung konsultasi lewat WhatsApp untuk
-                    dibantu pilih model yang paling cocok.
+                    Jelajahi koleksi unggulan atau langsung konsultasi lewat WhatsApp untuk
+                    menemukan model yang paling cocok.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Button asChild variant="secondary" className="bg-white text-stone-900">
                     <Link href="/products">Lihat Koleksi</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="border-white/30 bg-[#EE4D2D] text-white hover:bg-[#D94227]"
+                  >
+                    <Link href="https://shopee.co.id/ansla.annisalabel" target="_blank">
+                      Beli di Shopee
+                    </Link>
                   </Button>
                   <Button
                     asChild

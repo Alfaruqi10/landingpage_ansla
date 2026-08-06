@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { calculateTotalStock, validateProductBeforePublish } from "@/lib/product-variation";
+
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const voucherCodeRegex = /^[A-Z0-9-]+$/;
 const localUploadPathRegex = /^\/uploads\/[a-z0-9/_-]+\.(jpg|jpeg|png|webp|gif)$/i;
@@ -20,7 +22,18 @@ const imageSourceRequiredSchema = z
   .min(1, "Isi Image URL atau upload file gambar.")
   .refine((value) => isValidImageSource(value), "Image URL tidak valid.");
 
+const productMediaImageSchema = z.union([
+  imageSourceOptionalSchema,
+  z.object({
+    url: imageSourceRequiredSchema,
+    alt: z.string().trim().max(160).optional().default(""),
+    sortOrder: z.coerce.number().int().nonnegative().optional().default(0),
+    isPrimary: z.boolean().optional().default(false)
+  })
+]);
+
 const productVariantSchema = z.object({
+  id: z.string().trim().optional().default(""),
   name: z.string().trim().min(1, "Nama varian wajib diisi."),
   hex: z.string().trim().optional().default(""),
   imageUrl: z
@@ -35,7 +48,26 @@ const productVariantSchema = z.object({
   galleryIndexes: z.array(z.number().int().positive()).optional().default([]),
   sizes: z.array(z.string().trim().min(1)).optional().default([]),
   stockBySize: z.record(z.coerce.number().int().nonnegative()).optional().default({}),
+  skuBySize: z.record(z.string().trim()).optional().default({}),
+  priceBySize: z.record(z.coerce.number().int().nonnegative().nullable()).optional().default({}),
+  combinations: z
+    .array(
+      z.object({
+        id: z.string().trim().min(1),
+        productId: z.string().trim().optional(),
+        colorId: z.string().trim().min(1),
+        colorName: z.string().trim().min(1),
+        size: z.string().trim().min(1),
+        stock: z.coerce.number().int().nonnegative(),
+        sku: z.string().trim().optional().default(""),
+        price: z.coerce.number().int().nonnegative().nullable().optional().default(null),
+        isActive: z.boolean().optional().default(true)
+      })
+    )
+    .optional()
+    .default([]),
   totalStock: z.coerce.number().int().nonnegative().optional().default(0),
+  stockStatus: z.enum(["Tersedia", "Habis"]).optional(),
   price: z.number().int().nonnegative().optional(),
   isDefault: z.boolean().optional().default(false),
   isActive: z.boolean().optional().default(true)
@@ -68,6 +100,19 @@ export const customerRegisterSchema = z
       });
     }
   });
+
+export const forgotPasswordRequestSchema = z.object({
+  email: z.string().trim().email("Email tidak valid."),
+  phone: z.string().trim().max(30).optional().or(z.literal(""))
+});
+
+export const adminCustomerSchema = z.object({
+  id: z.string().trim().min(1, "ID pelanggan tidak ditemukan."),
+  name: z.string().trim().min(2, "Nama minimal 2 karakter."),
+  email: z.string().trim().email("Email tidak valid."),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  newPassword: z.string().trim().optional().or(z.literal(""))
+});
 
 export const leadSchema = z
   .object({
@@ -131,8 +176,8 @@ export const productSchema = z
     description: z.string().trim().min(20, "Description minimal 20 karakter."),
     imageUrl: imageSourceRequiredSchema,
     galleryImages: z
-      .array(imageSourceOptionalSchema)
-      .max(9, "Galeri model maksimal 9 gambar.")
+      .array(productMediaImageSchema)
+      .max(12, "Galeri produk maksimal 12 gambar.")
       .optional()
       .default([]),
     variantOptions: z.array(productVariantSchema).optional().default([]),
@@ -149,6 +194,59 @@ export const productSchema = z
         code: z.ZodIssueCode.custom,
         path: ["compareAtPrice"],
         message: "Compare price harus lebih besar atau sama dengan harga jual."
+      });
+    }
+
+    if (!data.isActive) {
+      return;
+    }
+
+    const activeVariants = data.variantOptions.filter((variant) => variant.isActive !== false);
+    const combinations = activeVariants.flatMap((variant) => {
+      if (variant.combinations.length > 0) {
+        return variant.combinations;
+      }
+
+      return Object.entries(variant.stockBySize).map(([size, stock]) => ({
+        id: `${variant.id || variant.name}-${size}`,
+        colorId: variant.id || variant.name,
+        colorName: variant.name,
+        size,
+        stock,
+        sku: variant.skuBySize[size] || "",
+        price: variant.priceBySize[size] ?? null,
+        isActive: variant.sizes.length === 0 || variant.sizes.includes(size)
+      }));
+    });
+    const variationValidation = validateProductBeforePublish({
+      name: data.name,
+      price: data.price,
+      imageUrl: data.imageUrl,
+      isActive: data.isActive,
+      colors: activeVariants.map((variant) => ({
+        id: variant.id,
+        name: variant.name,
+        hex: variant.hex,
+        imageUrl: variant.imageUrl,
+        galleryIndexes: variant.galleryIndexes,
+        isActive: variant.isActive
+      })),
+      variants: combinations
+    });
+
+    if (!variationValidation.ok) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["variantOptions"],
+        message: variationValidation.errors[0] || "Variasi produk belum lengkap."
+      });
+    }
+
+    if (calculateTotalStock(combinations) <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["variantOptions"],
+        message: "Total stok variasi aktif harus lebih dari 0."
       });
     }
   });

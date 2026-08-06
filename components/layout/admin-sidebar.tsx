@@ -4,8 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BadgePercent,
+  CreditCard,
   LayoutDashboard,
   Layers3,
+  Mail,
   MessageSquareQuote,
   Package,
   PanelsTopLeft,
@@ -20,12 +22,14 @@ const adminNavItems = [
   { href: "/admin", label: "Ringkasan", icon: LayoutDashboard },
   { href: "/admin/products", label: "Produk", icon: Package },
   { href: "/admin/orders", label: "Pesanan", icon: ShoppingBag },
+  { href: "/admin/customers", label: "Akun Pelanggan", icon: Users },
   { href: "/admin/categories", label: "Collections", icon: PanelsTopLeft },
   { href: "/admin/vouchers", label: "Voucher", icon: BadgePercent },
+  { href: "/admin/checkout-settings", label: "Checkout", icon: CreditCard },
   { href: "/admin/testimonials", label: "Testimoni", icon: MessageSquareQuote },
   { href: "/admin/faqs", label: "FAQs", icon: Layers3 },
   { href: "/admin/banners", label: "Banner", icon: PanelsTopLeft },
-  { href: "/admin/leads", label: "Leads & Pesan", icon: Users }
+  { href: "/admin/leads", label: "Leads & Pesan", icon: Mail }
 ];
 
 export function AdminSidebar() {
